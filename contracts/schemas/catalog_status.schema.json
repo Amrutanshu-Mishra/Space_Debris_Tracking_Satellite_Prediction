@@ -1,0 +1,77 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://prahari.dev/schemas/catalog_status.schema.json",
+  "title": "CatalogStatus",
+  "description": "Health and funnel telemetry for the ingest + screening pipeline.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "object_count",
+    "last_refresh",
+    "next_refresh",
+    "source",
+    "epoch_age_hours",
+    "screening_window_hours",
+    "last_screen_duration_s",
+    "pairs_considered",
+    "pairs_fine_screened",
+    "events_found"
+  ],
+  "properties": {
+    "object_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of objects in the current catalogue snapshot."
+    },
+    "last_refresh": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC timestamp of the most recent successful catalogue ingest."
+    },
+    "next_refresh": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC timestamp of the next scheduled ingest (6-hourly by default)."
+    },
+    "source": {
+      "type": "string",
+      "description": "Identifier of the upstream data source, e.g. celestrak-gp-active."
+    },
+    "epoch_age_hours": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["p50", "p90", "max"],
+      "description": "Distribution of TLE epoch age across the current catalogue, hours.",
+      "properties": {
+        "p50": { "type": "number", "minimum": 0 },
+        "p90": { "type": "number", "minimum": 0 },
+        "max": { "type": "number", "minimum": 0 }
+      }
+    },
+    "screening_window_hours": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Forward propagation horizon used by the last screening run, hours. 72 by default."
+    },
+    "last_screen_duration_s": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Wall-clock duration of the last full screening run, seconds."
+    },
+    "pairs_considered": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total object pairs entering the coarse filter, ~N(N-1)/2 for N objects."
+    },
+    "pairs_fine_screened": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Pairs surviving the coarse filter and re-propagated at 1-second resolution. Must be >99.99% smaller than pairs_considered."
+    },
+    "events_found": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Conjunction events emitted by the last screening run."
+    }
+  }
+}

@@ -1,0 +1,15 @@
+[project]
+name = "prahari-worker"
+version = "0.1.0"
+description = "PRAHARI Celery worker: scheduled catalogue refresh + screening runs."
+requires-python = ">=3.11"
+dependencies = [
+    "celery[redis]>=5.4",
+    "prahari-orbital @ file:../orbital",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.4", "mypy>=1.9"]
+
+[tool.ruff]
+line-length = 100

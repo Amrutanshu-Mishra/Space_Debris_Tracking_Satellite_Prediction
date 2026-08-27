@@ -1,0 +1,27 @@
+# Scalability artifact only — not on the demo path. See k8s/README.md.
+# An alternative to Celery Beat: expresses the 6-hourly refresh+screen cycle
+# as a Kubernetes CronJob. Not used in the demo, where Celery Beat inside
+# the worker Deployment owns the schedule.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: prahari-screening
+spec:
+  schedule: "0 */6 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: screening
+              image: ghcr.io/PLACEHOLDER_ORG/prahari-worker:latest
+              command: ["celery", "-A", "prahari_worker.celery_app", "call", "prahari_worker.tasks.refresh_catalog"]
+              env:
+                - name: PRAHARI_DATA_SOURCE
+                  value: "live"
+                - name: DATABASE_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: prahari-secrets
+                      key: database-url
+          restartPolicy: OnFailure

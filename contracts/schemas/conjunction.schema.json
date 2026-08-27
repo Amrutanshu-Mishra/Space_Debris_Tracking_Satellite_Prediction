@@ -1,0 +1,109 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://prahari.dev/schemas/conjunction.schema.json",
+  "title": "ConjunctionEvent",
+  "description": "A screened close-approach event between two catalogue objects. Carries a composite risk_score and confidence, never a probability of collision — see root README, 'Why we don't publish a probability of collision'.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "primary",
+    "secondary",
+    "tca",
+    "miss_distance_km",
+    "relative_velocity_km_s",
+    "radial_km",
+    "in_track_km",
+    "cross_track_km",
+    "combined_radius_m",
+    "risk_score",
+    "risk_tier",
+    "confidence",
+    "confidence_note",
+    "max_epoch_age_hours",
+    "screened_at"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Stable identifier for this screened event."
+    },
+    "primary": { "$ref": "#/definitions/objectRef" },
+    "secondary": { "$ref": "#/definitions/objectRef" },
+    "tca": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Time of closest approach, UTC, ISO 8601. The root of the range-rate function found by Brent's method."
+    },
+    "miss_distance_km": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Range between the two objects at TCA, kilometres."
+    },
+    "relative_velocity_km_s": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Magnitude of the relative velocity vector at TCA, km/s."
+    },
+    "radial_km": {
+      "type": "number",
+      "description": "Miss distance component along the primary's radial (RTN) axis, kilometres. Signed."
+    },
+    "in_track_km": {
+      "type": "number",
+      "description": "Miss distance component along the primary's in-track (RTN) axis, kilometres. Signed."
+    },
+    "cross_track_km": {
+      "type": "number",
+      "description": "Miss distance component along the primary's cross-track (RTN) axis, kilometres. Signed."
+    },
+    "combined_radius_m": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Sum of the two objects' assumed hard-body radii, metres."
+    },
+    "risk_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Composite risk score in [0, 1]: a weighted function of miss distance, relative velocity, and combined radius, NOT a probability of collision."
+    },
+    "risk_tier": {
+      "type": "string",
+      "enum": ["GREEN", "AMBER", "RED"],
+      "description": "Discretised risk_score for display and alerting."
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Confidence in [0, 1] in the screening result, decaying as the older of the two TLE epochs ages, especially below 500 km where drag dominates."
+    },
+    "confidence_note": {
+      "type": "string",
+      "description": "Human-readable explanation of what is degrading confidence for this event, if anything."
+    },
+    "max_epoch_age_hours": {
+      "type": "number",
+      "minimum": 0,
+      "description": "The larger of the two objects' epoch_age_hours at screening time. Primary driver of confidence."
+    },
+    "screened_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this event was produced by the screening job, UTC, ISO 8601."
+    }
+  },
+  "definitions": {
+    "objectRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["norad_id", "name"],
+      "properties": {
+        "norad_id": { "type": "integer", "minimum": 1 },
+        "name": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

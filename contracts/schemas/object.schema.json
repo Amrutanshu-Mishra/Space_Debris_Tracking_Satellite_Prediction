@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://prahari.dev/schemas/object.schema.json",
+  "title": "CatalogObject",
+  "description": "A single object in the tracked catalogue, derived from a CelesTrak GP/TLE record.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "norad_id",
+    "name",
+    "tle_line1",
+    "tle_line2",
+    "epoch",
+    "epoch_age_hours",
+    "object_type",
+    "rcs_size",
+    "radius_m",
+    "perigee_km",
+    "apogee_km",
+    "inclination_deg"
+  ],
+  "properties": {
+    "norad_id": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "NORAD catalogue number, the stable identifier for the object."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable object name as published by the source catalogue."
+    },
+    "tle_line1": {
+      "type": "string",
+      "pattern": "^1 .{68}$",
+      "description": "Raw TLE line 1, 69 characters, unmodified from source."
+    },
+    "tle_line2": {
+      "type": "string",
+      "pattern": "^2 .{68}$",
+      "description": "Raw TLE line 2, 69 characters, unmodified from source."
+    },
+    "epoch": {
+      "type": "string",
+      "format": "date-time",
+      "description": "TLE epoch timestamp, UTC, ISO 8601."
+    },
+    "epoch_age_hours": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Hours elapsed between epoch and the time this record was screened. Drives confidence decay."
+    },
+    "object_type": {
+      "type": "string",
+      "enum": ["PAYLOAD", "ROCKET_BODY", "DEBRIS", "UNKNOWN"],
+      "description": "Coarse object classification from the source catalogue."
+    },
+    "rcs_size": {
+      "type": "string",
+      "enum": ["SMALL", "MEDIUM", "LARGE", "UNKNOWN"],
+      "description": "Radar cross-section bucket as published by the source catalogue."
+    },
+    "radius_m": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Assumed hard-body radius in metres, derived from rcs_size via the lookup table documented in prahari_orbital.scoring."
+    },
+    "perigee_km": {
+      "type": "number",
+      "description": "Perigee altitude above a spherical Earth, kilometres, derived from the mean elements at epoch."
+    },
+    "apogee_km": {
+      "type": "number",
+      "description": "Apogee altitude above a spherical Earth, kilometres, derived from the mean elements at epoch."
+    },
+    "inclination_deg": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 180,
+      "description": "Orbital inclination in degrees."
+    }
+  }
+}

@@ -1,0 +1,83 @@
+version: "3.9"
+
+# This is the demo path. Kubernetes manifests in k8s/ are a scalability
+# artifact only and are never exercised for the live demo.
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-prahari}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-prahari}
+      POSTGRES_DB: ${POSTGRES_DB:-prahari}
+    ports:
+      - "5432:5432"
+    volumes:
+      - prahari_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-prahari}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: services/api/Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      PRAHARI_DATA_SOURCE: ${PRAHARI_DATA_SOURCE:-mock}
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./contracts:/app/contracts:ro
+
+  worker:
+    build:
+      context: .
+      dockerfile: services/worker/Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      PRAHARI_DATA_SOURCE: ${PRAHARI_DATA_SOURCE:-mock}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./contracts:/app/contracts:ro
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000/api/v1}
+      VITE_WS_BASE_URL: ${VITE_WS_BASE_URL:-ws://localhost:8000/api/v1}
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api
+
+volumes:
+  prahari_db_data:

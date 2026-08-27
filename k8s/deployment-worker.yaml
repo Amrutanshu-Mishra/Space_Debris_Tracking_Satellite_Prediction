@@ -1,0 +1,40 @@
+# Scalability artifact only — not on the demo path. See k8s/README.md.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prahari-worker
+  labels:
+    app: prahari-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prahari-worker
+  template:
+    metadata:
+      labels:
+        app: prahari-worker
+    spec:
+      containers:
+        - name: worker
+          image: ghcr.io/PLACEHOLDER_ORG/prahari-worker:latest
+          env:
+            - name: PRAHARI_DATA_SOURCE
+              value: "live"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: prahari-secrets
+                  key: database-url
+            - name: CELERY_BROKER_URL
+              valueFrom:
+                secretKeyRef:
+                  name: prahari-secrets
+                  key: celery-broker-url
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "4"
+              memory: "2Gi"

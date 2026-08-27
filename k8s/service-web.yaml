@@ -1,0 +1,12 @@
+# Scalability artifact only — not on the demo path. See k8s/README.md.
+apiVersion: v1
+kind: Service
+metadata:
+  name: prahari-web
+spec:
+  selector:
+    app: prahari-web
+  ports:
+    - port: 80
+      targetPort: 5173
+  type: LoadBalancer

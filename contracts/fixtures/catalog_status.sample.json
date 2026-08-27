@@ -1,0 +1,12 @@
+{
+  "object_count": 200,
+  "last_refresh": "2026-08-26T06:00:00Z",
+  "next_refresh": "2026-08-26T12:00:00Z",
+  "source": "celestrak-gp-active",
+  "epoch_age_hours": { "p50": 8.4, "p90": 31.2, "max": 212.7 },
+  "screening_window_hours": 72,
+  "last_screen_duration_s": 187.3,
+  "pairs_considered": 445419281,
+  "pairs_fine_screened": 11204,
+  "events_found": 40
+}

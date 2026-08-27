@@ -1,0 +1,962 @@
+[
+  {
+    "event_id": "00000026-1e9a-4b60-93b3-36fcca9d8831",
+    "primary": {
+      "norad_id": 33456,
+      "name": "IRIDIUM 33 DEB 165"
+    },
+    "secondary": {
+      "norad_id": 59442,
+      "name": "CZ-4C DEB 84"
+    },
+    "tca": "2026-08-26T15:51:23Z",
+    "miss_distance_km": 5.681,
+    "relative_velocity_km_s": 1.19,
+    "radial_km": 0.809,
+    "in_track_km": 4.361,
+    "cross_track_km": -3.55,
+    "combined_radius_m": 1.0,
+    "risk_score": 0.03,
+    "risk_tier": "GREEN",
+    "confidence": 0.95,
+    "confidence_note": "Perigee is below 500 km; drag uncertainty elevated.",
+    "max_epoch_age_hours": 13.1,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "0000000d-a0b3-4b50-9bf9-5d9544e22691",
+    "primary": {
+      "norad_id": 25544,
+      "name": "ISS (ZARYA)"
+    },
+    "secondary": {
+      "norad_id": 27860,
+      "name": "IRIDIUM 33 DEB 845"
+    },
+    "tca": "2026-08-26T16:06:25Z",
+    "miss_distance_km": 14.453,
+    "relative_velocity_km_s": 8.26,
+    "radial_km": -7.353,
+    "in_track_km": 9.662,
+    "cross_track_km": 7.84,
+    "combined_radius_m": 11.0,
+    "risk_score": 0.22,
+    "risk_tier": "GREEN",
+    "confidence": 0.61,
+    "confidence_note": "Secondary TLE epoch is 94.6 h old; perigee is below 500 km; drag uncertainty elevated.",
+    "max_epoch_age_hours": 94.6,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "00000012-f154-4afa-aed6-ff5e2f14f777",
+    "primary": {
+      "norad_id": 34073,
+      "name": "CZ-4C DEB 368"
+    },
+    "secondary": {
+      "norad_id": 48469,
+      "name": "GLOBALSTAR-4750"
+    },
+    "tca": "2026-08-26T16:39:23Z",
+    "miss_distance_km": 1.468,
+    "relative_velocity_km_s": 10.76,
+    "radial_km": -0.551,
+    "in_track_km": -0.581,
+    "cross_track_km": 1.23,
+    "combined_radius_m": 3.0,
+    "risk_score": 0.69,
+    "risk_tier": "AMBER",
+    "confidence": 0.83,
+    "confidence_note": "Both TLE epochs are fresh and perigees are above 500 km.",
+    "max_epoch_age_hours": 41.5,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "00000023-65fa-4ebf-8c06-6ab9fb6bf1dc",
+    "primary": {
+      "norad_id": 34073,
+      "name": "CZ-4C DEB 368"
+    },
+    "secondary": {
+      "norad_id": 11253,
+      "name": "GAOFEN-2074"
+    },
+    "tca": "2026-08-26T18:09:45Z",
+    "miss_distance_km": 16.058,
+    "relative_velocity_km_s": 2.71,
+    "radial_km": 5.227,
+    "in_track_km": -1.559,
+    "cross_track_km": -15.104,
+    "combined_radius_m": 1.0,
+    "risk_score": 0.07,
+    "risk_tier": "GREEN",
+    "confidence": 0.83,
+    "confidence_note": "Both TLE epochs are fresh and perigees are above 500 km.",
+    "max_epoch_age_hours": 41.5,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "00000001-d763-4bda-858f-757f6dd013f3",
+    "primary": {
+      "norad_id": 40737,
+      "name": "FENGYUN 1C DEB 377"
+    },
+    "secondary": {
+      "norad_id": 53898,
+      "name": "FENGYUN 1C DEB 654"
+    },
+    "tca": "2026-08-26T18:45:24Z",
+    "miss_distance_km": 13.259,
+    "relative_velocity_km_s": 8.33,
+    "radial_km": 6.316,
+    "in_track_km": 5.768,
+    "cross_track_km": 10.131,
+    "combined_radius_m": 1.0,
+    "risk_score": 0.22,
+    "risk_tier": "GREEN",
+    "confidence": 0.76,
+    "confidence_note": "Secondary TLE epoch is 58.3 h old.",
+    "max_epoch_age_hours": 58.3,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "00000004-8d16-4cb7-9a12-5b817b8301cf",
+    "primary": {
+      "norad_id": 31186,
+      "name": "COSMOS-5215"
+    },
+    "secondary": {
+      "norad_id": 16769,
+      "name": "GLOBALSTAR-5540"
+    },
+    "tca": "2026-08-26T20:29:33Z",
+    "miss_distance_km": 14.077,
+    "relative_velocity_km_s": 2.76,
+    "radial_km": 5.996,
+    "in_track_km": -1.752,
+    "cross_track_km": 12.615,
+    "combined_radius_m": 10.5,
+    "risk_score": 0.07,
+    "risk_tier": "GREEN",
+    "confidence": 0.47,
+    "confidence_note": "Secondary TLE epoch is 126.1 h old.",
+    "max_epoch_age_hours": 126.1,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "0000000f-15a3-4f6e-af83-a17e9ee4105d",
+    "primary": {
+      "norad_id": 50915,
+      "name": "ARIANE 44 DEB 730"
+    },
+    "secondary": {
+      "norad_id": 30888,
+      "name": "SL-16 DEB 153"
+    },
+    "tca": "2026-08-26T20:34:44Z",
+    "miss_distance_km": 4.814,
+    "relative_velocity_km_s": 9.23,
+    "radial_km": 1.016,
+    "in_track_km": 1.384,
+    "cross_track_km": -4.497,
+    "combined_radius_m": 1.0,
+    "risk_score": 0.27,
+    "risk_tier": "GREEN",
+    "confidence": 0.31,
+    "confidence_note": "Secondary TLE epoch is 165.1 h old.",
+    "max_epoch_age_hours": 165.1,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "00000018-8ae1-4e3c-ae7c-d3f673461e07",
+    "primary": {
+      "norad_id": 14800,
+      "name": "GLOBALSTAR-5571"
+    },
+    "secondary": {
+      "norad_id": 14903,
+      "name": "ARIANE 44 R/B"
+    },
+    "tca": "2026-08-26T21:00:19Z",
+    "miss_distance_km": 6.88,
+    "relative_velocity_km_s": 3.37,
+    "radial_km": -1.722,
+    "in_track_km": -2.788,
+    "cross_track_km": 6.049,
+    "combined_radius_m": 3.0,
+    "risk_score": 0.09,
+    "risk_tier": "GREEN",
+    "confidence": 0.75,
+    "confidence_note": "Secondary TLE epoch is 59.1 h old; perigee is below 500 km; drag uncertainty elevated.",
+    "max_epoch_age_hours": 59.1,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "0000001f-7aa7-48b3-a470-d36844d18524",
+    "primary": {
+      "norad_id": 34618,
+      "name": "GAOFEN-5417"
+    },
+    "secondary": {
+      "norad_id": 25544,
+      "name": "ISS (ZARYA)"
+    },
+    "tca": "2026-08-26T21:05:43Z",
+    "miss_distance_km": 15.531,
+    "relative_velocity_km_s": 4.08,
+    "radial_km": -2.267,
+    "in_track_km": -6.555,
+    "cross_track_km": 13.896,
+    "combined_radius_m": 10.5,
+    "risk_score": 0.11,
+    "risk_tier": "GREEN",
+    "confidence": 0.36,
+    "confidence_note": "Primary TLE epoch is 153.4 h old; perigee is below 500 km; drag uncertainty elevated.",
+    "max_epoch_age_hours": 153.4,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "0000001c-b1c0-4f69-9d12-2ddace015413",
+    "primary": {
+      "norad_id": 55697,
+      "name": "SL-16 R/B"
+    },
+    "secondary": {
+      "norad_id": 45004,
+      "name": "COSMOS-5848"
+    },
+    "tca": "2026-08-26T22:04:22Z",
+    "miss_distance_km": 2.034,
+    "relative_velocity_km_s": 8.68,
+    "radial_km": 0.332,
+    "in_track_km": 0.231,
+    "cross_track_km": 1.994,
+    "combined_radius_m": 12.5,
+    "risk_score": 0.59,
+    "risk_tier": "AMBER",
+    "confidence": 0.91,
+    "confidence_note": "Both TLE epochs are fresh and perigees are above 500 km.",
+    "max_epoch_age_hours": 21.2,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "00000020-09ee-44de-865a-5f3305aa5eab",
+    "primary": {
+      "norad_id": 22243,
+      "name": "DELTA 2 R/B"
+    },
+    "secondary": {
+      "norad_id": 14575,
+      "name": "COSMOS-3784"
+    },
+    "tca": "2026-08-26T22:27:15Z",
+    "miss_distance_km": 0.245,
+    "relative_velocity_km_s": 12.14,
+    "radial_km": 0.035,
+    "in_track_km": -0.099,
+    "cross_track_km": 0.221,
+    "combined_radius_m": 12.5,
+    "risk_score": 0.92,
+    "risk_tier": "RED",
+    "confidence": 0.93,
+    "confidence_note": "Both TLE epochs are fresh and perigees are above 500 km.",
+    "max_epoch_age_hours": 16.2,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "00000008-56c6-4127-ae0b-2c76284e4cd4",
+    "primary": {
+      "norad_id": 38367,
+      "name": "FENGYUN 1C DEB 494"
+    },
+    "secondary": {
+      "norad_id": 11220,
+      "name": "CZ-4C DEB 32"
+    },
+    "tca": "2026-08-26T23:49:28Z",
+    "miss_distance_km": 14.167,
+    "relative_velocity_km_s": 8.1,
+    "radial_km": -3.638,
+    "in_track_km": -11.494,
+    "cross_track_km": -7.44,
+    "combined_radius_m": 3.0,
+    "risk_score": 0.22,
+    "risk_tier": "GREEN",
+    "confidence": 0.92,
+    "confidence_note": "Perigee is below 500 km; drag uncertainty elevated.",
+    "max_epoch_age_hours": 18.8,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "00000025-3d42-4caa-9f1d-4f5b98a15e4f",
+    "primary": {
+      "norad_id": 13282,
+      "name": "ONEWEB-1323"
+    },
+    "secondary": {
+      "norad_id": 54544,
+      "name": "SL-16 DEB 88"
+    },
+    "tca": "2026-08-27T00:57:58Z",
+    "miss_distance_km": 0.871,
+    "relative_velocity_km_s": 8.7,
+    "radial_km": -0.183,
+    "in_track_km": -0.51,
+    "cross_track_km": 0.682,
+    "combined_radius_m": 12.5,
+    "risk_score": 0.69,
+    "risk_tier": "AMBER",
+    "confidence": 0.8,
+    "confidence_note": "Perigee is below 500 km; drag uncertainty elevated.",
+    "max_epoch_age_hours": 47.7,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "00000027-62cc-40ae-b05a-805b227dcecc",
+    "primary": {
+      "norad_id": 18352,
+      "name": "GLOBALSTAR-1326"
+    },
+    "secondary": {
+      "norad_id": 41823,
+      "name": "SL-16 DEB 39"
+    },
+    "tca": "2026-08-27T02:01:23Z",
+    "miss_distance_km": 19.688,
+    "relative_velocity_km_s": 7.95,
+    "radial_km": 6.065,
+    "in_track_km": 10.301,
+    "cross_track_km": 15.644,
+    "combined_radius_m": 10.5,
+    "risk_score": 0.21,
+    "risk_tier": "GREEN",
+    "confidence": 0.48,
+    "confidence_note": "Primary TLE epoch is 125.4 h old; perigee is below 500 km; drag uncertainty elevated.",
+    "max_epoch_age_hours": 125.4,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "00000007-92ac-41d6-966f-fd1da3ea21a2",
+    "primary": {
+      "norad_id": 15684,
+      "name": "SL-16 R/B"
+    },
+    "secondary": {
+      "norad_id": 13994,
+      "name": "COSMOS 2251 DEB 52"
+    },
+    "tca": "2026-08-27T04:10:58Z",
+    "miss_distance_km": 1.49,
+    "relative_velocity_km_s": 8.48,
+    "radial_km": 0.401,
+    "in_track_km": 1.112,
+    "cross_track_km": 0.906,
+    "combined_radius_m": 3.0,
+    "risk_score": 0.65,
+    "risk_tier": "AMBER",
+    "confidence": 0.9,
+    "confidence_note": "Perigee is below 500 km; drag uncertainty elevated.",
+    "max_epoch_age_hours": 24.8,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "00000021-6f33-4af0-b5ca-ff2dcca99089",
+    "primary": {
+      "norad_id": 16636,
+      "name": "ONEWEB-4352"
+    },
+    "secondary": {
+      "norad_id": 27424,
+      "name": "ENVISAT"
+    },
+    "tca": "2026-08-27T04:36:58Z",
+    "miss_distance_km": 2.316,
+    "relative_velocity_km_s": 9.54,
+    "radial_km": -0.743,
+    "in_track_km": -1.38,
+    "cross_track_km": 1.706,
+    "combined_radius_m": 12.5,
+    "risk_score": 0.58,
+    "risk_tier": "AMBER",
+    "confidence": 0.82,
+    "confidence_note": "Both TLE epochs are fresh and perigees are above 500 km.",
+    "max_epoch_age_hours": 44.1,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "0000001b-a680-4f3c-bbcc-452d71e15b9f",
+    "primary": {
+      "norad_id": 25544,
+      "name": "ISS (ZARYA)"
+    },
+    "secondary": {
+      "norad_id": 57316,
+      "name": "IRIDIUM 33 DEB 69"
+    },
+    "tca": "2026-08-27T05:40:47Z",
+    "miss_distance_km": 13.65,
+    "relative_velocity_km_s": 1.57,
+    "radial_km": 5.545,
+    "in_track_km": -10.584,
+    "cross_track_km": 6.599,
+    "combined_radius_m": 10.5,
+    "risk_score": 0.04,
+    "risk_tier": "GREEN",
+    "confidence": 0.84,
+    "confidence_note": "Perigee is below 500 km; drag uncertainty elevated.",
+    "max_epoch_age_hours": 38.7,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "00000016-65dd-4595-a46e-a6725ae86d18",
+    "primary": {
+      "norad_id": 25799,
+      "name": "PSLV R/B"
+    },
+    "secondary": {
+      "norad_id": 31186,
+      "name": "COSMOS-5215"
+    },
+    "tca": "2026-08-27T11:05:06Z",
+    "miss_distance_km": 0.379,
+    "relative_velocity_km_s": 13.27,
+    "radial_km": -0.071,
+    "in_track_km": -0.059,
+    "cross_track_km": 0.367,
+    "combined_radius_m": 12.5,
+    "risk_score": 0.99,
+    "risk_tier": "RED",
+    "confidence": 0.84,
+    "confidence_note": "Both TLE epochs are fresh and perigees are above 500 km.",
+    "max_epoch_age_hours": 38.7,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "0000001d-b011-492d-bc0e-044288fc3da1",
+    "primary": {
+      "norad_id": 38440,
+      "name": "OBJECT 38440"
+    },
+    "secondary": {
+      "norad_id": 28800,
+      "name": "SL-16 DEB 713"
+    },
+    "tca": "2026-08-27T11:28:26Z",
+    "miss_distance_km": 7.417,
+    "relative_velocity_km_s": 3.24,
+    "radial_km": -4.449,
+    "in_track_km": 3.369,
+    "cross_track_km": -4.885,
+    "combined_radius_m": 3.5,
+    "risk_score": 0.09,
+    "risk_tier": "GREEN",
+    "confidence": 0.96,
+    "confidence_note": "Perigee is below 500 km; drag uncertainty elevated.",
+    "max_epoch_age_hours": 9.6,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "00000002-d9d9-4448-a094-2aeadbeae9f8",
+    "primary": {
+      "norad_id": 40737,
+      "name": "FENGYUN 1C DEB 377"
+    },
+    "secondary": {
+      "norad_id": 59385,
+      "name": "FENGYUN 1C DEB 417"
+    },
+    "tca": "2026-08-27T12:34:16Z",
+    "miss_distance_km": 2.014,
+    "relative_velocity_km_s": 9.67,
+    "radial_km": 0.632,
+    "in_track_km": 0.677,
+    "cross_track_km": -1.788,
+    "combined_radius_m": 1.0,
+    "risk_score": 0.62,
+    "risk_tier": "AMBER",
+    "confidence": 0.68,
+    "confidence_note": "Secondary TLE epoch is 76.6 h old.",
+    "max_epoch_age_hours": 76.6,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "00000000-4c93-4314-96b5-2fb61e158e2f",
+    "primary": {
+      "norad_id": 24790,
+      "name": "SL-16 DEB 462"
+    },
+    "secondary": {
+      "norad_id": 33591,
+      "name": "NOAA 19"
+    },
+    "tca": "2026-08-27T12:52:16Z",
+    "miss_distance_km": 4.846,
+    "relative_velocity_km_s": 2.26,
+    "radial_km": 2.091,
+    "in_track_km": 0.034,
+    "cross_track_km": 4.371,
+    "combined_radius_m": 3.5,
+    "risk_score": 0.08,
+    "risk_tier": "GREEN",
+    "confidence": 0.85,
+    "confidence_note": "Both TLE epochs are fresh and perigees are above 500 km.",
+    "max_epoch_age_hours": 35.3,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "00000011-a19d-4044-8183-6be7ac9204b4",
+    "primary": {
+      "norad_id": 43905,
+      "name": "YAOGAN-5815"
+    },
+    "secondary": {
+      "norad_id": 30481,
+      "name": "IRIDIUM 33 DEB 157"
+    },
+    "tca": "2026-08-27T13:27:26Z",
+    "miss_distance_km": 2.247,
+    "relative_velocity_km_s": 4.57,
+    "radial_km": 1.285,
+    "in_track_km": 0.658,
+    "cross_track_km": 1.722,
+    "combined_radius_m": 1.0,
+    "risk_score": 0.45,
+    "risk_tier": "AMBER",
+    "confidence": 0.48,
+    "confidence_note": "Primary TLE epoch is 124.0 h old.",
+    "max_epoch_age_hours": 124.0,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "00000009-2e2a-491a-ac8e-8d92d0c59550",
+    "primary": {
+      "norad_id": 27089,
+      "name": "GAOFEN-3573"
+    },
+    "secondary": {
+      "norad_id": 59858,
+      "name": "DELTA 2 R/B"
+    },
+    "tca": "2026-08-27T13:51:47Z",
+    "miss_distance_km": 2.207,
+    "relative_velocity_km_s": 6.65,
+    "radial_km": -0.794,
+    "in_track_km": -1.797,
+    "cross_track_km": -1.007,
+    "combined_radius_m": 3.0,
+    "risk_score": 0.51,
+    "risk_tier": "AMBER",
+    "confidence": 0.98,
+    "confidence_note": "Perigee is below 500 km; drag uncertainty elevated.",
+    "max_epoch_age_hours": 4.3,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "00000013-7506-4332-a28d-78bbcdd8af09",
+    "primary": {
+      "norad_id": 36275,
+      "name": "COSMOS-3312"
+    },
+    "secondary": {
+      "norad_id": 22749,
+      "name": "THOR ABLESTAR DEB 698"
+    },
+    "tca": "2026-08-27T15:15:32Z",
+    "miss_distance_km": 15.787,
+    "relative_velocity_km_s": 3.84,
+    "radial_km": -1.883,
+    "in_track_km": -1.39,
+    "cross_track_km": -15.613,
+    "combined_radius_m": 3.0,
+    "risk_score": 0.1,
+    "risk_tier": "GREEN",
+    "confidence": 0.9,
+    "confidence_note": "Both TLE epochs are fresh and perigees are above 500 km.",
+    "max_epoch_age_hours": 23.4,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "0000000c-a1a7-4d32-ad32-86d5d5098e07",
+    "primary": {
+      "norad_id": 48597,
+      "name": "SL-16 DEB 315"
+    },
+    "secondary": {
+      "norad_id": 11897,
+      "name": "GAOFEN-3531"
+    },
+    "tca": "2026-08-27T19:43:23Z",
+    "miss_distance_km": 7.383,
+    "relative_velocity_km_s": 4.01,
+    "radial_km": 2.557,
+    "in_track_km": -3.486,
+    "cross_track_km": -5.985,
+    "combined_radius_m": 12.5,
+    "risk_score": 0.11,
+    "risk_tier": "GREEN",
+    "confidence": 0.49,
+    "confidence_note": "Primary TLE epoch is 123.4 h old; perigee is below 500 km; drag uncertainty elevated.",
+    "max_epoch_age_hours": 123.4,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "00000017-55cc-4acb-b5fe-cf3e9256d707",
+    "primary": {
+      "norad_id": 54949,
+      "name": "STARLINK-3306"
+    },
+    "secondary": {
+      "norad_id": 44163,
+      "name": "CZ-4C R/B"
+    },
+    "tca": "2026-08-27T20:06:55Z",
+    "miss_distance_km": 15.521,
+    "relative_velocity_km_s": 8.93,
+    "radial_km": -2.215,
+    "in_track_km": -5.903,
+    "cross_track_km": -14.183,
+    "combined_radius_m": 5.0,
+    "risk_score": 0.24,
+    "risk_tier": "GREEN",
+    "confidence": 0.81,
+    "confidence_note": "Both TLE epochs are fresh and perigees are above 500 km.",
+    "max_epoch_age_hours": 45.2,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "00000006-02b5-42ea-929a-dee999a9af6a",
+    "primary": {
+      "norad_id": 16288,
+      "name": "YAOGAN-5368"
+    },
+    "secondary": {
+      "norad_id": 22912,
+      "name": "SL-16 R/B"
+    },
+    "tca": "2026-08-27T21:35:44Z",
+    "miss_distance_km": 0.493,
+    "relative_velocity_km_s": 13.21,
+    "radial_km": 0.067,
+    "in_track_km": 0.162,
+    "cross_track_km": -0.461,
+    "combined_radius_m": 10.5,
+    "risk_score": 0.91,
+    "risk_tier": "RED",
+    "confidence": 0.68,
+    "confidence_note": "Primary TLE epoch is 77.4 h old.",
+    "max_epoch_age_hours": 77.4,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "0000001a-4f80-42b2-b1e6-756e4f32ea54",
+    "primary": {
+      "norad_id": 13994,
+      "name": "COSMOS 2251 DEB 52"
+    },
+    "secondary": {
+      "norad_id": 40697,
+      "name": "SENTINEL-1B"
+    },
+    "tca": "2026-08-28T00:26:31Z",
+    "miss_distance_km": 0.663,
+    "relative_velocity_km_s": 6.57,
+    "radial_km": 0.211,
+    "in_track_km": -0.472,
+    "cross_track_km": 0.416,
+    "combined_radius_m": 3.0,
+    "risk_score": 0.69,
+    "risk_tier": "AMBER",
+    "confidence": 0.84,
+    "confidence_note": "Perigee is below 500 km; drag uncertainty elevated.",
+    "max_epoch_age_hours": 39.3,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "00000005-3cf8-475a-b92a-52d6f301bb6c",
+    "primary": {
+      "norad_id": 32896,
+      "name": "FALCON 9 R/B"
+    },
+    "secondary": {
+      "norad_id": 46936,
+      "name": "ONEWEB-5032"
+    },
+    "tca": "2026-08-28T00:54:07Z",
+    "miss_distance_km": 7.314,
+    "relative_velocity_km_s": 3.27,
+    "radial_km": -1.366,
+    "in_track_km": 2.658,
+    "cross_track_km": -6.676,
+    "combined_radius_m": 12.5,
+    "risk_score": 0.09,
+    "risk_tier": "GREEN",
+    "confidence": 0.92,
+    "confidence_note": "Perigee is below 500 km; drag uncertainty elevated.",
+    "max_epoch_age_hours": 18.4,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "00000024-81b2-4f66-a63f-b88932df8d45",
+    "primary": {
+      "norad_id": 40697,
+      "name": "SENTINEL-1B"
+    },
+    "secondary": {
+      "norad_id": 34454,
+      "name": "FENGYUN 1C DEB"
+    },
+    "tca": "2026-08-28T09:53:08Z",
+    "miss_distance_km": 1.349,
+    "relative_velocity_km_s": 5.91,
+    "radial_km": 0.209,
+    "in_track_km": -1.098,
+    "cross_track_km": -0.755,
+    "combined_radius_m": 3.0,
+    "risk_score": 0.6,
+    "risk_tier": "AMBER",
+    "confidence": 0.84,
+    "confidence_note": "Both TLE epochs are fresh and perigees are above 500 km.",
+    "max_epoch_age_hours": 39.3,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "00000022-248c-4f0b-973e-800ad76f1e65",
+    "primary": {
+      "norad_id": 33456,
+      "name": "IRIDIUM 33 DEB 165"
+    },
+    "secondary": {
+      "norad_id": 40045,
+      "name": "OBJECT 40045"
+    },
+    "tca": "2026-08-28T10:59:08Z",
+    "miss_distance_km": 0.116,
+    "relative_velocity_km_s": 8.52,
+    "radial_km": 0.035,
+    "in_track_km": -0.07,
+    "cross_track_km": 0.085,
+    "combined_radius_m": 1.5,
+    "risk_score": 0.93,
+    "risk_tier": "RED",
+    "confidence": 0.97,
+    "confidence_note": "Perigee is below 500 km; drag uncertainty elevated.",
+    "max_epoch_age_hours": 7.7,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "00000019-6bd0-4557-b2d2-30ec1a5ed196",
+    "primary": {
+      "norad_id": 20461,
+      "name": "GAOFEN-2975"
+    },
+    "secondary": {
+      "norad_id": 21386,
+      "name": "ONEWEB-1472"
+    },
+    "tca": "2026-08-28T22:09:08Z",
+    "miss_distance_km": 5.126,
+    "relative_velocity_km_s": 2.58,
+    "radial_km": -1.528,
+    "in_track_km": 2.148,
+    "cross_track_km": -4.396,
+    "combined_radius_m": 1.0,
+    "risk_score": 0.07,
+    "risk_tier": "GREEN",
+    "confidence": 0.83,
+    "confidence_note": "Both TLE epochs are fresh and perigees are above 500 km.",
+    "max_epoch_age_hours": 41.4,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "00000014-5a6c-4d7d-bff2-999e7c93243e",
+    "primary": {
+      "norad_id": 46275,
+      "name": "FENGYUN 1C DEB 127"
+    },
+    "secondary": {
+      "norad_id": 36612,
+      "name": "COSMOS 2251 DEB 312"
+    },
+    "tca": "2026-08-28T22:18:04Z",
+    "miss_distance_km": 6.333,
+    "relative_velocity_km_s": 8.06,
+    "radial_km": 1.813,
+    "in_track_km": -0.295,
+    "cross_track_km": -6.061,
+    "combined_radius_m": 1.0,
+    "risk_score": 0.21,
+    "risk_tier": "GREEN",
+    "confidence": 0.7,
+    "confidence_note": "Secondary TLE epoch is 71.4 h old; perigee is below 500 km; drag uncertainty elevated.",
+    "max_epoch_age_hours": 71.4,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "00000015-f3fc-4314-b994-ab58be9da951",
+    "primary": {
+      "norad_id": 25545,
+      "name": "ARIANE 44 R/B"
+    },
+    "secondary": {
+      "norad_id": 46936,
+      "name": "ONEWEB-5032"
+    },
+    "tca": "2026-08-28T22:27:25Z",
+    "miss_distance_km": 3.811,
+    "relative_velocity_km_s": 1.26,
+    "radial_km": -1.54,
+    "in_track_km": -1.785,
+    "cross_track_km": 2.994,
+    "combined_radius_m": 5.0,
+    "risk_score": 0.18,
+    "risk_tier": "GREEN",
+    "confidence": 0.15,
+    "confidence_note": "Primary TLE epoch is 208.9 h old; perigee is below 500 km; drag uncertainty elevated.",
+    "max_epoch_age_hours": 208.9,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "00000010-41a9-41bb-b62a-10ac8a6fc4b3",
+    "primary": {
+      "norad_id": 43013,
+      "name": "NOAA 20"
+    },
+    "secondary": {
+      "norad_id": 48274,
+      "name": "STARLINK-2551"
+    },
+    "tca": "2026-08-28T23:11:09Z",
+    "miss_distance_km": 1.778,
+    "relative_velocity_km_s": 11.86,
+    "radial_km": 0.888,
+    "in_track_km": -0.609,
+    "cross_track_km": -1.415,
+    "combined_radius_m": 5.0,
+    "risk_score": 0.69,
+    "risk_tier": "AMBER",
+    "confidence": 0.89,
+    "confidence_note": "Both TLE epochs are fresh and perigees are above 500 km.",
+    "max_epoch_age_hours": 25.8,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "0000000b-7c8e-4ade-babb-ebe3ae7cfd14",
+    "primary": {
+      "norad_id": 44337,
+      "name": "STARLINK-1397"
+    },
+    "secondary": {
+      "norad_id": 25655,
+      "name": "THOR ABLESTAR DEB 629"
+    },
+    "tca": "2026-08-28T23:42:26Z",
+    "miss_distance_km": 16.824,
+    "relative_velocity_km_s": 5.88,
+    "radial_km": 3.92,
+    "in_track_km": 13.725,
+    "cross_track_km": 8.905,
+    "combined_radius_m": 3.0,
+    "risk_score": 0.16,
+    "risk_tier": "GREEN",
+    "confidence": 0.62,
+    "confidence_note": "Primary TLE epoch is 91.2 h old.",
+    "max_epoch_age_hours": 91.2,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "00000003-03ae-4c00-9a4b-d15450deef43",
+    "primary": {
+      "norad_id": 27424,
+      "name": "ENVISAT"
+    },
+    "secondary": {
+      "norad_id": 49597,
+      "name": "ONEWEB-4603"
+    },
+    "tca": "2026-08-28T23:45:13Z",
+    "miss_distance_km": 1.581,
+    "relative_velocity_km_s": 4.7,
+    "radial_km": 0.397,
+    "in_track_km": 0.797,
+    "cross_track_km": -1.306,
+    "combined_radius_m": 10.5,
+    "risk_score": 0.54,
+    "risk_tier": "AMBER",
+    "confidence": 0.82,
+    "confidence_note": "Both TLE epochs are fresh and perigees are above 500 km.",
+    "max_epoch_age_hours": 44.1,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "0000000e-69de-4755-99f4-7fd8d5bea8dc",
+    "primary": {
+      "norad_id": 57940,
+      "name": "ARIANE 44 DEB 613"
+    },
+    "secondary": {
+      "norad_id": 55258,
+      "name": "FENGYUN 1C DEB 772"
+    },
+    "tca": "2026-08-29T03:33:05Z",
+    "miss_distance_km": 6.233,
+    "relative_velocity_km_s": 7.45,
+    "radial_km": -1.983,
+    "in_track_km": -2.744,
+    "cross_track_km": 5.233,
+    "combined_radius_m": 3.0,
+    "risk_score": 0.2,
+    "risk_tier": "GREEN",
+    "confidence": 0.63,
+    "confidence_note": "Primary TLE epoch is 89.6 h old; perigee is below 500 km; drag uncertainty elevated.",
+    "max_epoch_age_hours": 89.6,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "0000001e-03b2-4bf4-9823-dfcc8f807d8b",
+    "primary": {
+      "norad_id": 55444,
+      "name": "FENGYUN 1C DEB 569"
+    },
+    "secondary": {
+      "norad_id": 42756,
+      "name": "COSMOS 2251 DEB 648"
+    },
+    "tca": "2026-08-29T04:44:14Z",
+    "miss_distance_km": 11.11,
+    "relative_velocity_km_s": 0.39,
+    "radial_km": -0.927,
+    "in_track_km": -4.127,
+    "cross_track_km": -10.274,
+    "combined_radius_m": 1.0,
+    "risk_score": 0.01,
+    "risk_tier": "GREEN",
+    "confidence": 0.9,
+    "confidence_note": "Perigee is below 500 km; drag uncertainty elevated.",
+    "max_epoch_age_hours": 22.9,
+    "screened_at": "2026-08-26T09:00:12Z"
+  },
+  {
+    "event_id": "0000000a-250f-496a-ab84-3be8f26f9b19",
+    "primary": {
+      "norad_id": 24722,
+      "name": "FENGYUN 1C DEB 26"
+    },
+    "secondary": {
+      "norad_id": 50065,
+      "name": "GAOFEN-2070"
+    },
+    "tca": "2026-08-29T05:52:49Z",
+    "miss_distance_km": 10.731,
+    "relative_velocity_km_s": 4.22,
+    "radial_km": -6.379,
+    "in_track_km": -5.048,
+    "cross_track_km": -6.999,
+    "combined_radius_m": 3.0,
+    "risk_score": 0.11,
+    "risk_tier": "GREEN",
+    "confidence": 0.73,
+    "confidence_note": "Secondary TLE epoch is 65.5 h old; perigee is below 500 km; drag uncertainty elevated.",
+    "max_epoch_age_hours": 65.5,
+    "screened_at": "2026-08-26T09:00:12Z"
+  }
+]
