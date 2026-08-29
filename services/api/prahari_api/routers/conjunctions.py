@@ -38,7 +38,7 @@ async def get_conjunction(event_id: str, data: DataSource = Depends(get_data_sou
 @router.get("/{event_id}/geometry")
 async def get_conjunction_geometry(
     event_id: str, data: DataSource = Depends(get_data_source)
-) -> list[dict[str, float | str]]:
+) -> list[dict[str, Any]]:
     event = await data.get_conjunction(event_id)
     if event is None:
         raise HTTPException(status_code=404, detail=f"No conjunction event with event_id={event_id}")

@@ -20,3 +20,8 @@ def get_data_source() -> DataSource:
         settings = get_settings()
         _data_source = MockDataSource() if settings.prahari_data_source == "mock" else LiveDataSource(settings)
     return _data_source
+
+
+def set_data_source(ds: DataSource | None) -> None:
+    global _data_source
+    _data_source = ds

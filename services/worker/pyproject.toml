@@ -5,11 +5,16 @@ description = "PRAHARI Celery worker: scheduled catalogue refresh + screening ru
 requires-python = ">=3.11"
 dependencies = [
     "celery[redis]>=5.4",
-    "prahari-orbital @ file:../orbital",
+    "sqlalchemy>=2.0",
+    "asyncpg>=0.29",
+    "redis>=5.0",
+    "pydantic>=2.6",
+    "pydantic-settings>=2.2",
+    "prahari-orbital",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0", "ruff>=0.4", "mypy>=1.9"]
+dev = ["pytest>=8.0", "ruff>=0.4", "mypy>=1.9", "aiosqlite>=0.20"]
 
 [tool.ruff]
 line-length = 100

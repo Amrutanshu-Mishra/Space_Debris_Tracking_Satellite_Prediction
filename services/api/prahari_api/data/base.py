@@ -7,8 +7,7 @@ see dependency.py for the PRAHARI_DATA_SOURCE switch.
 
 from __future__ import annotations
 
-from typing import Protocol
-
+from typing import Any, Protocol
 from prahari_orbital.models import CatalogObject, CatalogStatus, ConjunctionEvent
 
 
@@ -73,9 +72,8 @@ class DataSource(Protocol):
         """Single conjunction event by id, or None if not found."""
         ...
 
-    async def get_conjunction_geometry(self, event_id: str) -> list[dict[str, float | str]]:
+    async def get_conjunction_geometry(self, event_id: str) -> list[dict[str, Any]]:
         """Position samples around TCA for plotting a close-approach event.
-
         Returns:
             List of samples, each with at minimum:
             {"t": iso8601 str, "primary_km": [x, y, z], "secondary_km": [x, y, z],

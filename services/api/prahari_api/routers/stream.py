@@ -13,6 +13,7 @@ each screening run (see services/worker).
 from __future__ import annotations
 
 import asyncio
+import json
 import random
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
@@ -32,20 +33,44 @@ async def stream(websocket: WebSocket) -> None:
     data = get_data_source()
 
     events, _ = await data.list_conjunctions(limit=500, offset=0)
-    await websocket.send_json({"type": "snapshot", "data": [e.model_dump(mode="json") for e in events]})
+    await websocket.send_json(
+        {"type": "snapshot", "data": [e.model_dump(mode="json") for e in events]}
+    )
 
-    if settings.prahari_data_source != "mock":
-        raise NotImplementedError(
-            "TODO(backend-data): subscribe to the worker's Redis pub/sub channel "
-            "and forward each published ConjunctionEvent as {'type': 'event', 'data': ...}"
-        )
+    if settings.prahari_data_source == "mock":
+        try:
+            while True:
+                await asyncio.sleep(MOCK_REPLAY_INTERVAL_S)
+                if not events:
+                    continue
+                replayed = random.choice(events)
+                await websocket.send_json(
+                    {"type": "event", "data": replayed.model_dump(mode="json")}
+                )
+        except WebSocketDisconnect:
+            return
+    else:
+        import redis.asyncio as aioredis
 
-    try:
-        while True:
-            await asyncio.sleep(MOCK_REPLAY_INTERVAL_S)
-            if not events:
-                continue
-            replayed = random.choice(events)
-            await websocket.send_json({"type": "event", "data": replayed.model_dump(mode="json")})
-    except WebSocketDisconnect:
-        return
+        redis_client = aioredis.from_url(settings.redis_url)  # type: ignore[no-untyped-call]
+        pubsub = redis_client.pubsub()
+        try:
+            await pubsub.subscribe(settings.conjunction_stream_channel)
+            while True:
+                message = await pubsub.get_message(ignore_subscribe_messages=True, timeout=1.0)
+                if message and message["type"] == "message":
+                    raw_data = message["data"]
+                    if isinstance(raw_data, bytes):
+                        raw_data = raw_data.decode("utf-8")
+                    event_data = json.loads(raw_data) if isinstance(raw_data, str) else raw_data
+                    await websocket.send_json({"type": "event", "data": event_data})
+                await asyncio.sleep(0.01)
+        except WebSocketDisconnect:
+            pass
+        finally:
+            try:
+                await pubsub.unsubscribe(settings.conjunction_stream_channel)
+                await pubsub.close()
+                await redis_client.aclose()
+            except (OSError, ConnectionError):
+                pass

@@ -24,7 +24,9 @@ REDIS_URL = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/1")
 RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379/2")
 SCREENING_INTERVAL_HOURS = float(os.environ.get("SCREENING_INTERVAL_HOURS", "6"))
 
-app = Celery("prahari_worker", broker=REDIS_URL, backend=RESULT_BACKEND, include=["prahari_worker.tasks"])
+app = Celery(
+    "prahari_worker", broker=REDIS_URL, backend=RESULT_BACKEND, include=["prahari_worker.tasks"]
+)
 
 app.conf.beat_schedule = {
     "refresh-catalog": {

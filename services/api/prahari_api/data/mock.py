@@ -82,10 +82,10 @@ class MockDataSource:
         if tier:
             events = [e for e in events if e.risk_tier.value == tier]
         if since:
-            since_dt = datetime.fromisoformat(since.replace("Z", "+00:00"))
+            since_dt = datetime.fromisoformat(since)
             events = [e for e in events if e.tca >= since_dt]
         if until:
-            until_dt = datetime.fromisoformat(until.replace("Z", "+00:00"))
+            until_dt = datetime.fromisoformat(until)
             events = [e for e in events if e.tca <= until_dt]
         if min_score is not None:
             events = [e for e in events if e.risk_score >= min_score]
@@ -137,7 +137,9 @@ class MockDataSource:
         mean_alt_km = (obj.perigee_km + obj.apogee_km) / 2.0
         earth_radius_km = 6378.137
         orbital_radius_km = earth_radius_km + mean_alt_km
-        period_minutes = 2 * math.pi * math.sqrt((orbital_radius_km * 1000) ** 3 / 3.986004418e14) / 60.0
+        period_minutes = (
+            2 * math.pi * math.sqrt((orbital_radius_km * 1000) ** 3 / 3.986004418e14) / 60.0
+        )
 
         now = datetime.now(UTC)
         samples: list[dict[str, float | str]] = []

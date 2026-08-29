@@ -21,6 +21,13 @@ dev = [
     "datamodel-code-generator>=0.25",
 ]
 
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["prahari_orbital"]
+
 [tool.ruff]
 line-length = 100
 
