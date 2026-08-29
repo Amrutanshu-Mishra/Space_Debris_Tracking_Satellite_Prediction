@@ -9,6 +9,7 @@ dependencies = [
     "numpy>=1.26",
     "scipy>=1.12",
     "pydantic>=2.6",
+    "requests>=2.31",
 ]
 
 [project.optional-dependencies]
@@ -24,3 +25,24 @@ line-length = 100
 
 [tool.mypy]
 strict = true
+
+# requests ships no type information and we don't want types-requests in the
+# runtime env; the call sites (fetch_gp_data / _celestrak_session) are trivial.
+# urllib3 is pulled in only for its Retry helper on the same code path.
+[[tool.mypy.overrides]]
+module = ["requests", "requests.*", "urllib3", "urllib3.*"]
+ignore_missing_imports = true
+
+# skyfield ships no py.typed marker. It is the orbital core's propagation and
+# frame-conversion engine (propagate.py, frames.py); there is no typed
+# alternative, so we accept untyped imports from it.
+[[tool.mypy.overrides]]
+module = ["skyfield", "skyfield.*"]
+ignore_missing_imports = true
+
+# sgp4 ships no py.typed marker. It is the DoD SGP4 reference implementation
+# and the source of the vectorised SatrecArray path in propagate.py; there is
+# no typed alternative.
+[[tool.mypy.overrides]]
+module = ["sgp4", "sgp4.*"]
+ignore_missing_imports = true
