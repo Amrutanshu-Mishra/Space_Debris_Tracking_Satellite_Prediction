@@ -9,14 +9,16 @@ down: ## Stop the stack
 logs: ## Tail logs from all services
 	docker compose logs -f
 
-test: ## Run all test suites (orbital + api), host-side, no docker required
+test: ## Run all test suites (orbital + api + worker), host-side, no docker required
 	cd services/orbital && python -m pytest -q
 	cd services/api && python -m pytest -q
+	cd services/worker && python -m pytest -q
 	cd web && npm run test -- --run
 
 lint: ## Lint Python and TypeScript
 	cd services/orbital && ruff check . && mypy prahari_orbital
 	cd services/api && ruff check . && mypy prahari_api
+	cd services/worker && ruff check . && mypy prahari_worker
 	cd web && npm run lint && npm run typecheck
 
 seed: ## Regenerate Pydantic + TypeScript models from contracts/schemas
@@ -34,6 +36,7 @@ seed: ## Regenerate Pydantic + TypeScript models from contracts/schemas
 fmt: ## Format Python and TypeScript
 	cd services/orbital && ruff format .
 	cd services/api && ruff format .
+	cd services/worker && ruff format .
 	cd web && npm run format
 
 clean: ## Remove containers, volumes, and caches
