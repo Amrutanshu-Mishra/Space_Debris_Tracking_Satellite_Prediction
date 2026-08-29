@@ -1,15 +1,42 @@
 """Fine screening: exact TCA and miss geometry for coarse-filter survivors.
 
-Two stages, per candidate pair:
+Two stages:
 
 COARSE SWEEP
-    Re-propagate both objects on an evenly spaced grid (``coarse_step_seconds``,
-    typically 60 s) across the whole screening window and take the 3-D
-    separation at every step in one vectorised reduction — no Python loop over
-    timesteps. Every *local* minimum of that separation curve that dips below
-    the screening threshold is a distinct close approach; a pair can have
-    several across a 72 h window and all of them are carried forward, not just
-    the global minimum.
+    All coarse-filter survivors are re-propagated **once**, together, on the
+    shared ``coarse_step_seconds`` grid (typically 60 s) via
+    :func:`prahari_orbital.propagate.propagate_catalog`, and every pair is swept
+    against that one ``(n_objects, n_steps, 3)`` GCRS position array — no Python
+    loop over timesteps.
+
+    Sampling the separation on a discrete grid and testing it directly against
+    the 10 km threshold is *not* safe: two objects closing at 15 km/s move
+    ~900 km between 60 s samples, so a sub-kilometre true miss can read as
+    hundreds of km at every sample and be discarded — a silent missed warning.
+    So each pass pads the threshold by the largest distance the separation can
+    move between samples. The true minimum lies within ``dt / 2`` of some
+    sample and separation changes at no more than the relative speed, hence::
+
+        keep pair if  d_sampled < threshold + v_bound * (dt / 2)
+
+    ``v_bound(i, j) = v_max[i] + v_max[j]`` (triangle inequality), with
+    ``v_max`` each object's peak speed over the window — O(n_objects), computed
+    once from the ephemeris velocity array, never per-pair across all steps.
+
+    ``screen_candidates`` (batch) runs this as three passes; ``screen_pair``
+    (one pair) runs the single-pass equivalent:
+
+      * PASS 1 — stride 5 (dt = 300 s), pad ``v_bound * 150``; gates every pair.
+      * PASS 2 — stride 1 (dt = 60 s), pad ``v_bound * 30``; pass-1 survivors
+        only. Every local minimum of the padded curve is a candidate TCA.
+      * PASS 3 — brentq refinement (below) of each pass-2 local minimum.
+
+    Each pass is rigorous: any pair carried forward is guaranteed to include
+    every true minimum below the threshold. Passes 1–2 work in squared distance
+    in float32, accumulated one axis at a time; refinement stays float64. A
+    refined approach is reported only when its exact miss distance is below the
+    (unpadded) screening threshold — the padding widens the net, it does not
+    loosen what counts as an event.
 
 FINE REFINEMENT
     At the true time of closest approach the range stops changing, so the
@@ -34,6 +61,7 @@ RIC axes via :func:`prahari_orbital.frames.rtn_basis`. ``scoring.py`` turns a
 from __future__ import annotations
 
 import sys
+import time
 from dataclasses import dataclass
 from datetime import datetime
 from functools import lru_cache
@@ -47,7 +75,7 @@ from prahari_orbital import frames
 from prahari_orbital.filters import SCREENING_THRESHOLD_KM, CandidatePair
 from prahari_orbital.frames import StateVector
 from prahari_orbital.models import CatalogObject
-from prahari_orbital.propagate import propagate_one
+from prahari_orbital.propagate import propagate_catalog, propagate_one
 
 #: Coarse-sweep sampling step, seconds. Matches the coarse filter's grid.
 COARSE_STEP_SECONDS = 60.0
@@ -57,6 +85,18 @@ SCREENING_WINDOW_HOURS = 72.0
 
 #: brentq absolute tolerance on the TCA, in seconds (~1 microsecond).
 _TCA_XTOL_SECONDS = 1e-6
+
+#: Pass 1 subsamples the coarse grid by this stride: dt = 5 x
+#: COARSE_STEP_SECONDS = 300 s. Pass 2 runs at full resolution (stride 1).
+_PASS1_STRIDE = 5
+
+#: Pair-chunk sizes for the two vectorised sweeps, sized so one chunk's
+#: (n_pairs, n_steps) float32 squared-distance array is ~200 MB:
+#:   pass 1  -> ~865 steps  -> 50_000 pairs  (~0.17 GB)
+#:   pass 2  -> ~4321 steps -> 10_000 pairs  (~0.17 GB)
+#: Deliberately not one shared value — the step counts differ 5x.
+_PASS1_PAIR_CHUNK = 50_000
+_PASS2_PAIR_CHUNK = 10_000
 
 
 @dataclass(frozen=True)
@@ -305,6 +345,30 @@ def _sub_threshold_local_minima(
     return [int(i) for i in interior[is_minimum & below]]
 
 
+def _local_minima_below_sq(
+    d2_row: np.ndarray,
+    padded_threshold_sq: float,
+) -> list[int]:
+    """Squared-distance analogue of :func:`_sub_threshold_local_minima`.
+
+    A point ``i`` qualifies when ``d2[i] < d2[i-1]``, ``d2[i] <= d2[i+1]`` and
+    ``d2[i] <= padded_threshold_sq``. ``padded_threshold_sq`` is
+    ``(threshold_km + v_bound * dt / 2) ** 2`` for the pair — the squared,
+    closure-padded screening threshold — so no true sub-threshold minimum is
+    dropped before refinement. Same strict-left / non-strict-right rule (a
+    plateau counts once); indices 0 and ``n-1`` are never reported, so every
+    returned ``i`` has valid ``i-1`` / ``i+1`` neighbours for bracketing.
+    """
+    n = d2_row.size
+    if n < 3:
+        return []
+    interior = np.arange(1, n - 1)
+    here = d2_row[interior]
+    is_minimum = (here < d2_row[interior - 1]) & (here <= d2_row[interior + 1])
+    below = here <= padded_threshold_sq
+    return [int(i) for i in interior[is_minimum & below]]
+
+
 def screen_pair(
     primary: CatalogObject,
     secondary: CatalogObject,
@@ -390,58 +454,178 @@ def screen_candidates(
 ) -> list[ScreeningResult]:
     """Fine-screen every coarse-filter survivor, one result per close approach.
 
-    For each candidate pair: coarse-sweep the separation over the window, find
-    every sub-``threshold_km`` local minimum, and refine each to an exact TCA
-    (module docstring). A pair with several approaches across the window
-    contributes several :class:`ScreeningResult`\\ s.
+    All referenced objects are re-propagated **once**, together, on the coarse
+    grid (:func:`prahari_orbital.propagate.propagate_catalog`), then every pair
+    is swept against that shared ``(n_objects, n_steps, 3)`` position array in
+    the three padded passes described in the module docstring:
+
+      1. stride 5 (dt = 300 s), threshold padded by ``v_bound * 150`` — gates
+         every pair;
+      2. stride 1 (dt = 60 s), threshold padded by ``v_bound * 30`` — pass-1
+         survivors only; every local minimum of the padded squared-distance
+         curve is a candidate TCA;
+      3. :func:`find_tca` / brentq refinement of each pass-2 local minimum.
+
+    The padding (``v_bound = v_max[i] + v_max[j]``, from each object's peak
+    speed over the window) guarantees no true sub-``threshold_km`` approach is
+    dropped by grid sampling. A refined approach is kept only when its exact
+    miss distance is below ``threshold_km`` — padded selection cannot inflate
+    the event count. Passes 1–2 run in float32 squared distance, chunked to
+    ~0.2 GB per sweep (``_PASS1_PAIR_CHUNK`` / ``_PASS2_PAIR_CHUNK``);
+    refinement is float64. Survivor count and wall time are printed to stderr
+    after each pass.
+
+    A pair with several approaches across the window contributes several
+    :class:`ScreeningResult`\\ s.
 
     Args:
         objects_by_id: catalogue keyed by ``norad_id``. A candidate naming an
             id not present here is logged to stderr and skipped.
         candidates: output of ``filters.coarse_filter``.
-        coarse_step_seconds: coarse-sweep grid spacing, seconds.
+        coarse_step_seconds: coarse-sweep grid spacing, seconds (the stride-1
+            step; pass 1 uses 5x this).
         start: screening-window start, timezone-aware UTC.
         window_hours: screening-window span, hours.
-        threshold_km: a local minimum deeper (smaller) than this is refined;
-            shallower minima are ignored.
+        threshold_km: a refined approach is reported when its exact miss
+            distance is below this. Each pass keeps pairs / minima out to
+            ``threshold_km`` plus its closure pad.
 
     Returns:
         Flat list of :class:`ScreeningResult`, one per distinct refined
         approach, in candidate order then chronological order within a pair.
-        A pair with no sub-threshold minimum contributes nothing, silently
+        A pair with no sub-threshold approach contributes nothing, silently
         (the common case at scale). Brackets that turn out not to straddle a
         closing->opening transition (see :func:`find_tca`), and candidates
-        naming an unknown NORAD id, are logged to stderr and skipped, never
-        fatal to the batch.
+        naming an unknown NORAD id or an object that failed the shared
+        propagation, are logged to stderr and skipped, never fatal to the batch.
     """
-    results: list[ScreeningResult] = []
+    # 1. Resolve candidates -> the set of objects that must be propagated.
+    valid_candidates: list[CandidatePair] = []
+    valid_objects: list[tuple[CatalogObject, CatalogObject]] = []
+    to_propagate: dict[int, CatalogObject] = {}
     for candidate in candidates:
-        try:
-            primary = objects_by_id[candidate.primary_norad_id]
-            secondary = objects_by_id[candidate.secondary_norad_id]
-        except KeyError as exc:
+        primary = objects_by_id.get(candidate.primary_norad_id)
+        secondary = objects_by_id.get(candidate.secondary_norad_id)
+        if primary is None or secondary is None:
+            missing = (
+                candidate.primary_norad_id
+                if primary is None
+                else candidate.secondary_norad_id
+            )
             print(
                 f"[screen_candidates] candidate "
                 f"{candidate.primary_norad_id}/{candidate.secondary_norad_id} "
-                f"names unknown NORAD id {exc}; skipped",
+                f"names unknown NORAD id {missing}; skipped",
                 file=sys.stderr,
             )
             continue
+        valid_candidates.append(candidate)
+        valid_objects.append((primary, secondary))
+        to_propagate.setdefault(primary.norad_id, primary)
+        to_propagate.setdefault(secondary.norad_id, secondary)
 
-        times, separation_km = _coarse_separation(
-            primary,
-            secondary,
-            start=start,
-            window_hours=window_hours,
-            step_seconds=coarse_step_seconds,
+    if not valid_candidates:
+        return []
+
+    # 2. One shared re-propagation on the coarse (stride-1) grid.
+    hours = round(window_hours)
+    step = round(coarse_step_seconds)
+    try:
+        ephem = propagate_catalog(list(to_propagate.values()), start, hours, step)
+    except ValueError as exc:
+        print(
+            f"[screen_candidates] shared propagation produced no usable "
+            f"objects ({exc}); no pairs screened",
+            file=sys.stderr,
         )
-        minima = _sub_threshold_local_minima(separation_km, threshold_km)
-        if not minima:
-            # The common case for pairs that only cleared the crude analytic
-            # prefilter: no genuine close approach. Not an anomaly, so not
-            # logged — that would swamp stderr at catalogue scale.
-            continue
+        return []
 
+    row_of = {int(nid): row for row, nid in enumerate(ephem.norad_ids)}
+
+    # Drop candidates whose objects fell out of the shared propagation
+    # (decayed / unparseable TLE -- listed in ephem.failures).
+    kept_objects: list[tuple[CatalogObject, CatalogObject]] = []
+    pair_rows: list[tuple[int, int]] = []
+    for primary, secondary in valid_objects:
+        try:
+            pair_rows.append((row_of[primary.norad_id], row_of[secondary.norad_id]))
+        except KeyError as exc:
+            print(
+                f"[screen_candidates] {primary.norad_id}/{secondary.norad_id}: "
+                f"NORAD id {exc} failed the shared propagation; skipped",
+                file=sys.stderr,
+            )
+            continue
+        kept_objects.append((primary, secondary))
+
+    if not pair_rows:
+        return []
+
+    rows = np.asarray(pair_rows, dtype=np.int64)
+    pi = rows[:, 0]
+    pj = rows[:, 1]
+    n_pairs = rows.shape[0]
+
+    # float32 positions for the two sweeps (sub-metre at LEO radii, negligible
+    # against a padded threshold of hundreds of km); the per-object speed
+    # bound stays float64.
+    pos32 = np.ascontiguousarray(ephem.position_km, dtype=np.float32)
+    v_max = np.linalg.norm(ephem.velocity_km_s, axis=2).max(axis=1)  # (n_obj,) km/s
+    v_bound = v_max[pi] + v_max[pj]  # (n_pairs,) km/s, triangle-inequality bound
+
+    # 3. PASS 1 -- stride 5, dt = 300 s. Gates every pair.
+    stride = _PASS1_STRIDE
+    dt1 = coarse_step_seconds * stride
+    thr1_sq = (threshold_km + v_bound * (dt1 / 2.0)) ** 2  # (n_pairs,)
+    pos1 = pos32[:, ::stride, :]
+
+    survivor = np.zeros(n_pairs, dtype=bool)
+    t0 = time.perf_counter()
+    for lo in range(0, n_pairs, _PASS1_PAIR_CHUNK):
+        sl = slice(lo, lo + _PASS1_PAIR_CHUNK)
+        cpi, cpj = pi[sl], pj[sl]
+        d2 = (pos1[cpi, :, 0] - pos1[cpj, :, 0]) ** 2
+        d2 += (pos1[cpi, :, 1] - pos1[cpj, :, 1]) ** 2
+        d2 += (pos1[cpi, :, 2] - pos1[cpj, :, 2]) ** 2
+        survivor[sl] = d2.min(axis=1).astype(np.float64) <= thr1_sq[sl]
+    pass1_idx = np.nonzero(survivor)[0]
+    print(
+        f"[screen_candidates] pass 1 (stride {stride}, dt {dt1:g}s): "
+        f"{pass1_idx.size}/{n_pairs} pairs kept, "
+        f"{time.perf_counter() - t0:.3f}s",
+        file=sys.stderr,
+    )
+
+    # 4. PASS 2 -- stride 1, dt = 60 s, pass-1 survivors only.
+    dt2 = coarse_step_seconds
+    thr2_sq = (threshold_km + v_bound * (dt2 / 2.0)) ** 2  # (n_pairs,)
+
+    refine_jobs: list[tuple[int, list[int]]] = []
+    t0 = time.perf_counter()
+    for lo in range(0, pass1_idx.size, _PASS2_PAIR_CHUNK):
+        block = pass1_idx[lo : lo + _PASS2_PAIR_CHUNK]
+        cpi, cpj = pi[block], pj[block]
+        d2 = (pos32[cpi, :, 0] - pos32[cpj, :, 0]) ** 2
+        d2 += (pos32[cpi, :, 1] - pos32[cpj, :, 1]) ** 2
+        d2 += (pos32[cpi, :, 2] - pos32[cpj, :, 2]) ** 2  # (m, n_steps) float32
+        cap = thr2_sq[block]
+        for k in np.nonzero(d2.min(axis=1).astype(np.float64) <= cap)[0]:
+            minima = _local_minima_below_sq(d2[k], float(cap[k]))
+            if minima:
+                refine_jobs.append((int(block[k]), minima))
+    print(
+        f"[screen_candidates] pass 2 (stride 1, dt {dt2:g}s): "
+        f"{len(refine_jobs)}/{pass1_idx.size} pairs kept, "
+        f"{time.perf_counter() - t0:.3f}s",
+        file=sys.stderr,
+    )
+
+    # 5. PASS 3 -- brentq refinement of every pass-2 local minimum.
+    times = ephem.times
+    results: list[ScreeningResult] = []
+    t0 = time.perf_counter()
+    for cand_idx, minima in refine_jobs:
+        primary, secondary = kept_objects[cand_idx]
         for i in minima:
             try:
                 tca = find_tca(
@@ -457,6 +641,12 @@ def screen_candidates(
                     file=sys.stderr,
                 )
                 continue
-            results.append(_result_at_tca(primary, secondary, tca))
-
+            result = _result_at_tca(primary, secondary, tca)
+            if result.miss_distance_km < threshold_km:
+                results.append(result)
+    print(
+        f"[screen_candidates] pass 3 (brentq refine): {len(results)} approaches "
+        f"below {threshold_km:g} km, {time.perf_counter() - t0:.3f}s",
+        file=sys.stderr,
+    )
     return results

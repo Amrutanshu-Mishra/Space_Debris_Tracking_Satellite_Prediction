@@ -1,28 +1,44 @@
-"""The filter must discard nothing real — verified against brute force.
+"""Neither the coarse filter nor the fine screen may discard a real approach.
 
-A false negative in :func:`apogee_perigee_filter` is silent and
-unrecoverable: a genuine close approach simply never reaches ``screen.py``
-and no warning is issued. So this test does not trust the filter's logic at
-all. It runs the full O(N^2) brute force (every pair, minimum separation
-over a real 6-hour propagation) and the filtered path side by side, and
-asserts they flag the *exact same* set of sub-10-km pairs.
+Two independent brute-force checks, both against an external reference, never
+against our own output at the same resolution:
 
-The comparison is against brute force only — never the filter against
-itself.
+1. :func:`test_filter_discards_nothing_real` — a false negative in
+   :func:`apogee_perigee_filter` is silent and unrecoverable: a genuine close
+   approach simply never reaches ``screen.py``. So this test trusts the
+   filter's logic not at all: it runs the full O(N^2) brute force (every pair,
+   minimum separation over a real 6-hour propagation) and the filtered path
+   side by side and asserts they flag the same sub-10-km set.
+
+2. :func:`test_three_pass_pipeline_finds_every_fine_grid_event` — ``screen.py``
+   samples separation on a 60 s grid, and two objects closing fast move
+   hundreds of km between samples, so a sub-10-km miss can read as sub-threshold
+   at *no* sample. A 60-s-vs-60-s comparison is structurally blind to this. So
+   the reference here is a **5 s** propagation: any pair below 10 km on the 5 s
+   grid is a genuine event (the true minimum is only ever smaller), and the
+   padded three-pass ``screen_candidates`` — still sampling at 60 s — must
+   recover every one of them. In this fixture all such events are invisible at
+   60 s, so this is exactly the class of miss check (1) cannot see.
 """
 
 from __future__ import annotations
 
+import math
 from datetime import UTC, datetime
 from pathlib import Path
 
 import numpy as np
 import pytest
 
-from prahari_orbital.filters import SCREENING_THRESHOLD_KM, apogee_perigee_filter
+from prahari_orbital.filters import (
+    SCREENING_THRESHOLD_KM,
+    CandidatePair,
+    apogee_perigee_filter,
+)
 from prahari_orbital.ingest import build_catalog_objects, parse_tle_block, validate_tle_pair
 from prahari_orbital.models import CatalogObject
 from prahari_orbital.propagate import CatalogEphemeris, propagate_catalog
+from prahari_orbital.screen import screen_candidates
 
 CACHE_TLE = (
     Path(__file__).resolve().parents[1]
@@ -34,6 +50,17 @@ NOW_UTC = "2026-08-29T12:00:00Z"
 START = datetime(2026, 8, 29, 12, 0, 0, tzinfo=UTC)
 HOURS = 6
 STEP_SECONDS = 60
+
+#: Reference resolution for the fine-screen check. The screening pipeline
+#: samples at ``STEP_SECONDS`` (60 s); this 5 s grid is the external truth it
+#: is measured against — fine enough to expose fast conjunctions the 60 s grid
+#: steps straight over.
+FINE_STEP_SECONDS = 5
+
+#: brentq refinement can only find a closer approach than any grid sample, so
+#: the pipeline's miss distance must not exceed the 5 s grid minimum by more
+#: than this (slack for the float32 sweep and the two propagation code paths).
+REFINE_TOLERANCE_KM = 0.05
 
 N_OBJECTS = 200
 LEO_APOGEE_CUTOFF_KM = 2000.0
@@ -176,4 +203,128 @@ def test_filter_discards_nothing_real(
             f"Brute-force sub-{SCREENING_THRESHOLD_KM:g}km pairs: {len(brute_close)} "
             f"(filtered path found {len(filtered_close)}); "
             f"sub-{GUARANTEED_KEEP_KM:g}km pairs: {len(brute_near)}, all retained."
+        )
+
+
+@pytest.fixture(scope="module")
+def fine_reference_min_sep(
+    propagated: tuple[CatalogEphemeris, list[CatalogObject]],
+) -> dict[tuple[int, int], float]:
+    """Minimum separation per pair from a 5 s brute-force propagation.
+
+    The ground truth the 60 s screening pipeline is checked against: because a
+    sampled separation is an upper bound on the true minimum, any pair below
+    the threshold on this fine grid is unarguably a real close approach.
+    """
+    _ephem60, survivors = propagated
+    ephem = propagate_catalog(survivors, START, HOURS, FINE_STEP_SECONDS)
+    positions_km = np.ascontiguousarray(ephem.position_km, dtype=np.float64)
+    norad_ids = ephem.norad_ids.astype(np.int64)
+
+    i_idx, j_idx, min_sep_km = _all_pair_min_separations(positions_km)
+    out: dict[tuple[int, int], float] = {}
+    for a, b, sep in zip(i_idx.tolist(), j_idx.tolist(), min_sep_km.tolist()):
+        lo, hi = sorted((int(norad_ids[a]), int(norad_ids[b])))
+        out[(lo, hi)] = float(sep)
+    return out
+
+
+def test_three_pass_pipeline_finds_every_fine_grid_event(
+    propagated: tuple[CatalogEphemeris, list[CatalogObject]],
+    fine_reference_min_sep: dict[tuple[int, int], float],
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    ephem, survivors = propagated
+    positions_km = np.ascontiguousarray(ephem.position_km, dtype=np.float64)
+    norad_ids = ephem.norad_ids.astype(np.int64)
+    row_of = {int(nid): row for row, nid in enumerate(norad_ids)}
+    objects_by_id = {obj.norad_id: obj for obj in survivors}
+
+    # Every unordered survivor pair is a screening candidate: this test
+    # exercises screen.py on its own, not the coarse filter.
+    candidates = [
+        CandidatePair(
+            primary_norad_id=lo,
+            secondary_norad_id=hi,
+            min_separation_km=float("inf"),
+        )
+        for lo, hi in (
+            (min(a.norad_id, b.norad_id), max(a.norad_id, b.norad_id))
+            for i, a in enumerate(survivors)
+            for b in survivors[i + 1 :]
+        )
+    ]
+
+    results = screen_candidates(
+        objects_by_id,
+        candidates,
+        start=START,
+        window_hours=float(HOURS),
+        coarse_step_seconds=float(STEP_SECONDS),
+        threshold_km=SCREENING_THRESHOLD_KM,
+    )
+    pipeline_best: dict[tuple[int, int], float] = {}
+    for r in results:
+        pair = (
+            min(r.primary_norad_id, r.secondary_norad_id),
+            max(r.primary_norad_id, r.secondary_norad_id),
+        )
+        pipeline_best[pair] = min(pipeline_best.get(pair, math.inf), r.miss_distance_km)
+
+    # Events per the 5 s reference (restricted to survivors present in both
+    # propagations). True minimum <= 5 s-sampled minimum, so every one of
+    # these is a genuine sub-threshold conjunction.
+    reference_events = {
+        pair: m
+        for pair, m in fine_reference_min_sep.items()
+        if m < SCREENING_THRESHOLD_KM and pair[0] in row_of and pair[1] in row_of
+    }
+    assert reference_events, (
+        f"5 s reference found no sub-{SCREENING_THRESHOLD_KM:g}km approach in "
+        f"this sample; the screening assertion would be vacuous "
+        f"(fixture or selection changed?)"
+    )
+
+    # 60 s brute force for exactly those pairs. The rewrite exists because
+    # these are the approaches screen.py's own 60 s grid cannot see.
+    blind_to_60s: list[tuple[tuple[int, int], float, float]] = []
+    for pair, m5 in reference_events.items():
+        delta = positions_km[row_of[pair[0]]] - positions_km[row_of[pair[1]]]
+        min_60s = float(np.sqrt(np.einsum("tc,tc->t", delta, delta)).min())
+        if min_60s >= SCREENING_THRESHOLD_KM:
+            blind_to_60s.append((pair, m5, min_60s))
+    assert blind_to_60s, (
+        "every 5 s event is also visible at 60 s in this sample, so it does "
+        "not exercise the fast-conjunction miss the threshold padding prevents"
+    )
+
+    # THE ASSERTION: the padded three-pass pipeline, still sampling at 60 s,
+    # recovers every event the 5 s reference finds...
+    missed = sorted(pair for pair in reference_events if pair not in pipeline_best)
+    assert not missed, (
+        f"three-pass pipeline missed {len(missed)} sub-{SCREENING_THRESHOLD_KM:g}km "
+        f"approach(es) the 5 s reference found: "
+        f"{[(p, round(reference_events[p], 3)) for p in missed[:10]]}. "
+        f"The threshold padding is too small — fix the padding, not this test."
+    )
+    # ...and refines each to no worse than the 5 s grid saw.
+    worse = {
+        pair: (pipeline_best[pair], m5)
+        for pair, m5 in reference_events.items()
+        if pipeline_best[pair] > m5 + REFINE_TOLERANCE_KM
+    }
+    assert not worse, (
+        f"pipeline miss distance exceeds the 5 s grid minimum (refinement can "
+        f"only improve on a sample) for: "
+        f"{[(p, round(a, 3), round(b, 3)) for p, (a, b) in list(worse.items())[:10]]}"
+    )
+
+    with capsys.disabled():
+        print(
+            f"\n[screen_correctness] {len(survivors)} objects, "
+            f"{len(candidates)} candidate pairs; 5 s-reference sub-"
+            f"{SCREENING_THRESHOLD_KM:g}km events: {len(reference_events)}, "
+            f"of which {len(blind_to_60s)} invisible at 60 s "
+            f"(worst 60 s miss {max(m for _, _, m in blind_to_60s):.1f} km). "
+            f"Three-pass pipeline recovered all {len(reference_events)}."
         )
