@@ -93,21 +93,64 @@ def itrf_to_lat_lon_alt(state: StateVector) -> np.ndarray:
 
 
 def rtn_basis(state_gcrs: StateVector) -> np.ndarray:
-    """Compute the Radial/In-track/Cross-track (RTN) rotation basis for an object.
+    """Compute the Radial/Transverse/Normal (RTN) rotation basis for an object.
 
-    Used by screen.py to decompose the miss-distance vector into
-    radial_km / in_track_km / cross_track_km for the conjunction contract.
+    RTN and RIC are the same orthonormal frame under two names:
+
+        R = radial      = pos / |pos|
+        T = transverse  = N x R          (a.k.a. "in-track")
+        N = normal      = pos x vel / |pos x vel|   (a.k.a. "cross-track")
+
+    ``conjunction.schema.json`` spells the components with the RIC names
+    (``radial_km`` / ``in_track_km`` / ``cross_track_km``); the T<->in-track,
+    N<->cross-track mapping is applied at the call site in
+    :func:`prahari_orbital.screen`, which is the only caller.
+
+    Note T is built as ``N x R`` (not from the raw velocity), so the basis is
+    exactly orthonormal even for an eccentric orbit where ``vel`` is not
+    perpendicular to ``pos``; the in-track axis is then the projection of the
+    velocity direction into the plane normal to R.
 
     Args:
-        state_gcrs: StateVector with frame == "GCRS", single instant (position_km shape (3,)).
+        state_gcrs: StateVector with frame == "GCRS", single instant —
+            ``position_km`` and ``velocity_km_s`` both shape (3,).
 
     Returns:
-        ndarray shape (3, 3): rows are unit vectors [R, T, N] in GCRS, such that
-        a GCRS displacement vector `d` projects to RTN via `rtn_basis(state) @ d`.
+        ndarray shape (3, 3): rows are the unit vectors [R, T, N] expressed in
+        GCRS, so a GCRS displacement ``d`` (km) projects to RTN components via
+        ``rtn_basis(state) @ d`` (km, ordered radial, transverse, normal).
 
-    Units: dimensionless (unit vectors); no conversion of state itself.
+    Raises:
+        ValueError: frame is not "GCRS"; position/velocity are not shape (3,);
+            or ``|pos|`` / ``|pos x vel|`` is zero (degenerate state).
+
+    Units: dimensionless (unit vectors); the state itself is not converted.
+    Frame: GCRS in; the returned rows are GCRS unit vectors.
     """
-    raise NotImplementedError("TODO(orbital-core): R = pos/|pos|, N = pos x vel / |pos x vel|, T = N x R")
+    if state_gcrs.frame != "GCRS":
+        raise ValueError(f"rtn_basis: expected frame 'GCRS', got {state_gcrs.frame!r}")
+
+    r = np.asarray(state_gcrs.position_km, dtype=np.float64)
+    v = np.asarray(state_gcrs.velocity_km_s, dtype=np.float64)
+    if r.shape != (3,) or v.shape != (3,):
+        raise ValueError(
+            "rtn_basis: expected a single instant with position_km and "
+            f"velocity_km_s of shape (3,), got {r.shape} and {v.shape}"
+        )
+
+    r_norm = float(np.linalg.norm(r))
+    if r_norm == 0.0:
+        raise ValueError("rtn_basis: |position_km| is zero")
+    radial = r / r_norm
+
+    h = np.cross(r, v)
+    h_norm = float(np.linalg.norm(h))
+    if h_norm == 0.0:
+        raise ValueError("rtn_basis: |position_km x velocity_km_s| is zero")
+    normal = h / h_norm
+
+    transverse = np.cross(normal, radial)
+    return np.stack((radial, transverse, normal), axis=0)
 
 
 # --------------------------------------------------------------------------- #

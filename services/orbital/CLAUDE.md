@@ -2,8 +2,9 @@
 
 Operational guidance for an agent working in this directory. The root
 `../../CLAUDE.md` still applies on top of this; where they overlap, the
-stricter rule wins. This directory is the **orbital propagation core**:
-TLE ingestion, SGP4 propagation, and coordinate frames.
+stricter rule wins. This directory is the **orbital core**: TLE ingestion,
+SGP4 propagation, coordinate frames, conjunction filtering, pair screening,
+and risk scoring.
 
 ## Scope — what may and may not be written here
 
@@ -12,27 +13,27 @@ TLE ingestion, SGP4 propagation, and coordinate frames.
 - `prahari_orbital/ingest.py` — CelesTrak fetch, TLE parse, validation.
 - `prahari_orbital/propagate.py` — SGP4 wrapper, TLE → state-vector series.
 - `prahari_orbital/frames.py` — all coordinate-frame conversions.
-- `tests/test_propagate.py` and any new `tests/test_ingest.py` /
-  `tests/test_frames.py`.
+- `prahari_orbital/filters.py` — coarse conjunction filtering.
+- `prahari_orbital/screen.py` — pair screening / fine TCA search.
+- `prahari_orbital/scoring.py` — risk score, confidence, tiers.
+- `tests/` — the orbital test suite (`test_propagate.py`, `test_ingest.py`,
+  `test_frames.py`, `test_filters.py`, `test_screen.py`, `test_scoring.py`,
+  and new ones alongside them).
 - `tools/` — small standalone scripts (fetch a TLE, dump an ephemeris,
   eyeball a frame conversion). Not imported by the library.
 
 **Must NOT write or edit — these belong to other people:**
 
-- `prahari_orbital/filters.py` — coarse conjunction filtering.
-- `prahari_orbital/screen.py` — pair screening / fine TCA search.
-- `prahari_orbital/scoring.py` — risk score, confidence, tiers.
 - `prahari_orbital/models.py` — generated from `contracts/schemas/`,
   never hand-edited (see root `CLAUDE.md`).
 - Anything under `services/api/`, `services/worker/`, `web/`.
 
-If asked to implement conjunction filtering, pair screening, risk scoring,
-API routes, or database models: **refuse and say who owns it.** Filtering,
-screening, and scoring are workstream 2 (`docs/team/02-screening-scoring.md`).
-API and DB models are workstream 3 (`docs/team/03-backend-data.md`). These
-modules consume `propagate()` and `frames` output; if the contract between
-us needs to change, that is a conversation with those owners, not a
-unilateral signature change here.
+If asked to implement API routes, database models, or frontend code:
+**refuse and say who owns it.** API and DB models are workstream 3
+(`docs/team/03-backend-data.md`); the frontend is a separate workstream.
+Those consume this package's propagation, screening, and scoring output; if
+a contract between us needs to change, that is a conversation with those
+owners, not a unilateral signature change here.
 
 ### `Ephemeris` (ours) vs `StateVector` (the shared seam)
 
@@ -52,6 +53,24 @@ The `CatalogObject -> StateVector` functions in `propagate.py` (`propagate`,
 (`filters.py`, `screen.py`). Leave their signatures alone. If `Ephemeris` and
 `StateVector` should converge, that is a conversation with the screening
 owner, not a unilateral edit here.
+
+## Screening and scoring
+
+- **`contracts/schemas/conjunction.schema.json` is frozen.** Scoring output
+  must match it exactly — field names, types, nesting. If the schema
+  genuinely needs a new field, change the schema first (see
+  `contracts/README.md`) in the same change as the code that depends on it;
+  never hand-edit the generated models.
+- **There is no probability-of-collision field, and there never will be.**
+  Public TLEs carry no covariance, so a true Pc is not derivable from this
+  data. Never add such a field, never name anything `pc`, and never let a
+  docstring, comment, or string literal imply the risk score is a
+  probability. (This restates the root `CLAUDE.md` non-negotiable; it now
+  applies with full force to `scoring.py`.)
+- **The screening threshold is 10 km.** Any pair whose minimum separation
+  over the propagation window falls below 10 km is a candidate conjunction
+  event and is carried forward to scoring. Pairs that never come within
+  10 km are dropped.
 
 ## Units and frames — the most important rules in the project
 

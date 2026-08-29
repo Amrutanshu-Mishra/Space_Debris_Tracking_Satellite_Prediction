@@ -24,10 +24,18 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+import numpy as np
+
 from prahari_orbital.frames import StateVector
 from prahari_orbital.models import CatalogObject
 
 DEFAULT_THRESHOLD_KM = 25.0
+
+#: Any pair whose minimum separation over the propagation window falls below
+#: this is a candidate conjunction event (see services/orbital/CLAUDE.md,
+#: "Screening and scoring"). apogee_perigee_filter's pad_km must stay well
+#: above it.
+SCREENING_THRESHOLD_KM = 10.0
 
 
 @dataclass(frozen=True)
@@ -40,6 +48,123 @@ class CandidatePair:
     """Minimum sampled separation across the coarse time grid, km. A lower
     bound used for prioritisation, NOT the true miss distance — screen.py
     computes the true miss distance via fine re-propagation and root-finding."""
+
+
+@dataclass(frozen=True)
+class ApogeePerigeeFilterResult:
+    """Survivors of :func:`apogee_perigee_filter` plus its reduction stats.
+
+    Attributes:
+        pairs: surviving candidate pairs as ``(low_norad_id, high_norad_id)``
+            tuples (ids ascending within each tuple, list sorted ascending).
+            Every pair whose radial altitude bands overlap within ``pad_km``;
+            everything else has been proven unable to conjunct and dropped.
+        total_pairs: ``n * (n - 1) // 2`` — the unfiltered pair count.
+        surviving_pairs: ``len(pairs)``.
+        survival_ratio: ``surviving_pairs / total_pairs`` (``0.0`` when
+            ``total_pairs == 0``). The fraction kept; ``1 - survival_ratio``
+            is the fraction discarded.
+    """
+
+    pairs: list[tuple[int, int]]
+    total_pairs: int
+    surviving_pairs: int
+    survival_ratio: float
+
+
+def apogee_perigee_filter(
+    objects: list[CatalogObject],
+    pad_km: float = 100.0,
+) -> ApogeePerigeeFilterResult:
+    """Drop object pairs whose radial altitude bands cannot overlap.
+
+    RULE. A pair is discarded when one object's perigee clears the other's
+    apogee by more than ``pad_km``::
+
+        perigee_A - apogee_B > pad_km   or   perigee_B - apogee_A > pad_km
+
+    Orbits separated like that never bring the two objects within the
+    screening threshold, whatever their phasing or node geometry, so the
+    pair can be dropped without ever propagating it. Every other pair
+    survives.
+
+    The comparison uses ``perigee_km`` / ``apogee_km`` straight off each
+    :class:`~prahari_orbital.models.CatalogObject` — spherical *mean-element*
+    altitudes derived from the TLE's mean motion and eccentricity (see
+    :func:`prahari_orbital.ingest.build_catalog_objects`). Propagated
+    positions are deliberately not consulted: this stage runs before any
+    propagation.
+
+    Why ``pad_km`` defaults to 100 km. The pad has to absorb every way the
+    true radial separation can come out smaller than the mean-element band
+    gap implies:
+
+    * the 10 km screening threshold itself — two objects 10 km apart are
+      already a candidate event, so the gap must be shrunk by at least that;
+    * mean vs. osculating radius — ``perigee_km`` / ``apogee_km`` are from
+      *mean* elements, but the instantaneous geocentric radius breathes
+      around them by ~10-20 km per revolution under J2;
+    * element/propagation drift over the 72 h coarse-screening window — the
+      along- and cross-track error of a day-old TLE grows to a few tens of
+      km by 72 h, and some of that projects onto the radial direction.
+
+    100 km comfortably dominates the sum of those (~10 + ~20 + ~40 km) while
+    still discarding the large majority of catalogue pairs (any LEO object
+    against anything in MEO/GEO, most pairs that cross altitude regimes).
+    The filter is intentionally conservative: keeping a pair that later
+    screens clean costs one cheap propagation downstream, whereas dropping a
+    pair that was real is a silent missed warning. When the pad and the gap
+    are close, the pair is kept.
+
+    Args:
+        objects: catalogue objects to pair up. Fewer than two ⇒ no pairs.
+        pad_km: slack added to the apogee/perigee comparison, in kilometres.
+            Larger ⇒ more conservative (more pairs kept). A negative value
+            would make the filter *aggressive* and is almost certainly a
+            mistake, but is not rejected here.
+
+    Returns:
+        :class:`ApogeePerigeeFilterResult` — ``pairs`` holds the surviving
+        ``(low_id, high_id)`` NORAD-id tuples; the other fields are the
+        reduction statistics.
+
+    Units/frame: ``pad_km`` and the objects' perigee/apogee are kilometres
+        above a spherical Earth (mean-element altitudes). Output is integer
+        NORAD-id pairs — dimensionless, no coordinate frame involved.
+    """
+    n = len(objects)
+    total_pairs = n * (n - 1) // 2
+    if total_pairs == 0:
+        return ApogeePerigeeFilterResult(
+            pairs=[], total_pairs=0, surviving_pairs=0, survival_ratio=0.0
+        )
+
+    norad_ids = np.fromiter((o.norad_id for o in objects), dtype=np.int64, count=n)
+    perigee_km = np.fromiter((o.perigee_km for o in objects), dtype=np.float64, count=n)
+    apogee_km = np.fromiter((o.apogee_km for o in objects), dtype=np.float64, count=n)
+
+    # Every unordered pair once, as two index arrays — no Python loop over
+    # objects. Intermediate size is O(n^2); fine for prototype catalogue
+    # slices. Scaling to the full ~30k feed is the sorted-sweep prefilter's
+    # job (apogee_perigee_prefilter), not this function's.
+    i_idx, j_idx = np.triu_indices(n, k=1)
+
+    clears_ij = perigee_km[i_idx] - apogee_km[j_idx] > pad_km
+    clears_ji = perigee_km[j_idx] - apogee_km[i_idx] > pad_km
+    keep = ~(clears_ij | clears_ji)
+
+    id_a = norad_ids[i_idx[keep]]
+    id_b = norad_ids[j_idx[keep]]
+    lo = np.minimum(id_a, id_b).tolist()
+    hi = np.maximum(id_a, id_b).tolist()
+    pairs: list[tuple[int, int]] = sorted((int(a), int(b)) for a, b in zip(lo, hi))
+
+    return ApogeePerigeeFilterResult(
+        pairs=pairs,
+        total_pairs=total_pairs,
+        surviving_pairs=len(pairs),
+        survival_ratio=len(pairs) / total_pairs,
+    )
 
 
 def apogee_perigee_prefilter(

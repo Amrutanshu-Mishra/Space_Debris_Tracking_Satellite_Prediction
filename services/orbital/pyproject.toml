@@ -10,6 +10,7 @@ dependencies = [
     "scipy>=1.12",
     "pydantic>=2.6",
     "requests>=2.31",
+    "jsonschema>=4.20",
 ]
 
 [project.optional-dependencies]
@@ -45,4 +46,18 @@ ignore_missing_imports = true
 # no typed alternative.
 [[tool.mypy.overrides]]
 module = ["sgp4", "sgp4.*"]
+ignore_missing_imports = true
+
+# scipy ships no py.typed marker (scipy-stubs is a separate, partial package we
+# don't want in the runtime env). Used for optimize.brentq in screen.py's TCA
+# root-find and spatial.cKDTree on the coarse-filter path.
+[[tool.mypy.overrides]]
+module = ["scipy", "scipy.*"]
+ignore_missing_imports = true
+
+# jsonschema ships type hints but not a py.typed marker in every release line;
+# used in scoring.py to validate exported ConjunctionEvents against the frozen
+# conjunction.schema.json before writing.
+[[tool.mypy.overrides]]
+module = ["jsonschema", "jsonschema.*"]
 ignore_missing_imports = true
