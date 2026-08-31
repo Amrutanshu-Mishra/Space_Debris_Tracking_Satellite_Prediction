@@ -1,0 +1,11 @@
+# Overlay for `make demo-offline`. Cuts the compose network off from the
+# internet (internal: true) so the running stack has no route out. If the
+# health checks still pass with this applied, nothing fetches at runtime.
+#
+#   docker compose build                                   # needs network
+#   docker compose -f docker-compose.yml \
+#                  -f docker-compose.offline.yml up --wait  # no network
+
+networks:
+  default:
+    internal: true

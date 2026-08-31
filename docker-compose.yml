@@ -1,83 +1,59 @@
-version: "3.9"
-
-# This is the demo path. Kubernetes manifests in k8s/ are a scalability
-# artifact only and are never exercised for the live demo.
+# PRAHARI — demo stack. This is the path shown live, and it is meant to be
+# boring: two stateless containers, no database, no message broker, and no
+# network access at runtime.
+#
+#   api — FastAPI. Serves the screened-events JSON from contracts/fixtures in
+#         mock mode. The file is baked into the image by services/api/Dockerfile;
+#         contracts/ is also mounted read-only so an updated fixture is picked
+#         up without a rebuild.
+#   web — the built React bundle served by nginx on :80. nginx proxies /api to
+#         the api service, so the browser only ever makes same-origin requests
+#         and CORS never enters the picture.
+#
+# Nothing here reaches CelesTrak, a CDN, or a tile service. Once the images
+# are built the stack runs fully offline — see `make demo` and, for proof,
+# `make demo-offline`. The manifests in k8s/ are a deck artifact only; the
+# demonstration never runs on Kubernetes.
 
 services:
-  db:
-    image: postgres:16-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-prahari}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-prahari}
-      POSTGRES_DB: ${POSTGRES_DB:-prahari}
-    ports:
-      - "5432:5432"
-    volumes:
-      - prahari_db_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-prahari}"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
-  redis:
-    image: redis:7-alpine
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
   api:
     build:
       context: .
       dockerfile: services/api/Dockerfile
+    image: prahari/api:demo
     restart: unless-stopped
-    env_file: .env
     environment:
-      PRAHARI_DATA_SOURCE: ${PRAHARI_DATA_SOURCE:-mock}
+      PRAHARI_DATA_SOURCE: mock
+      PRAHARI_EVENTS_PATH: /app/contracts/fixtures/conjunctions.real.json
     ports:
       - "8000:8000"
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
     volumes:
       - ./contracts:/app/contracts:ro
-
-  worker:
-    build:
-      context: .
-      dockerfile: services/worker/Dockerfile
-    restart: unless-stopped
-    env_file: .env
-    environment:
-      PRAHARI_DATA_SOURCE: ${PRAHARI_DATA_SOURCE:-mock}
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    volumes:
-      - ./contracts:/app/contracts:ro
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/api/v1/health').status==200 else 1)"
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
 
   web:
     build:
       context: ./web
       dockerfile: Dockerfile
+    image: prahari/web:demo
     restart: unless-stopped
-    environment:
-      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000/api/v1}
-      VITE_WS_BASE_URL: ${VITE_WS_BASE_URL:-ws://localhost:8000/api/v1}
     ports:
-      - "5173:5173"
+      - "8080:80"
     depends_on:
-      - api
-
-volumes:
-  prahari_db_data:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO", "-", "http://localhost:80/"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 5s
