@@ -1,0 +1,124 @@
+.ep {
+  margin: 0;
+  padding: var(--space-5);
+  background: var(--field);
+  border: var(--hairline);
+}
+
+.ep[data-tier="clear"] {
+  --ep-mark: var(--tier-clear);
+}
+.ep[data-tier="caution"] {
+  --ep-mark: var(--tier-caution);
+}
+.ep[data-tier="act"] {
+  --ep-mark: var(--tier-act);
+}
+
+.ep__svg {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  overflow: visible;
+}
+
+.ep__ring {
+  fill: none;
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+
+.ep__ringlabel,
+.ep__ringunit,
+.ep__axislabel,
+.ep__keepoutlabel,
+.ep__misslabel,
+.ep__secondarylabel {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  fill: var(--mute);
+}
+
+.ep__axis {
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+
+.ep__axislabel {
+  fill: var(--ink);
+}
+
+/* hard-body keep-out: the one filled shape in the plot */
+.ep__keepout {
+  fill: var(--ink);
+  fill-opacity: 0.16;
+  stroke: var(--ink);
+  stroke-width: 1;
+}
+
+.ep__leader {
+  stroke: var(--mute);
+  stroke-width: 0.75;
+}
+
+.ep__primary {
+  fill: var(--ink);
+}
+
+/* the loud marks — tier-hued */
+.ep__miss {
+  stroke: var(--ep-mark);
+  stroke-width: 2;
+}
+
+.ep__misslabel {
+  fill: var(--ink);
+}
+
+.ep__secondary {
+  fill: var(--ep-mark);
+  stroke: var(--field);
+  stroke-width: 1;
+}
+
+.ep__secondarylabel {
+  fill: var(--ink);
+}
+
+.ep__caption {
+  margin-top: var(--space-4);
+}
+
+.ep__scale {
+  margin: 0;
+  font-size: var(--text-label);
+  color: var(--mute);
+  max-width: 52ch;
+}
+
+.ep__oop {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+  margin: var(--space-3) 0 0;
+}
+
+.ep__oop div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.ep__oop dt {
+  font-size: var(--text-label);
+  color: var(--mute);
+}
+
+.ep__oop dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-data);
+  color: var(--ink);
+}

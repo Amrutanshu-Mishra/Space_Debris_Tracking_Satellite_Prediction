@@ -1,0 +1,56 @@
+.catstatus {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  border: var(--hairline);
+  background: var(--field);
+}
+
+.catstatus__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-5);
+  border-left: var(--hairline);
+}
+
+.catstatus__item:first-child {
+  border-left: 0;
+}
+
+.catstatus__label {
+  font-size: var(--text-label);
+  color: var(--mute);
+}
+
+.catstatus__value {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-data);
+  color: var(--ink);
+}
+
+.catstatus__item--age {
+  margin-left: auto;
+}
+
+/* the epoch-age figure carries weight — it qualifies every row's confidence */
+.catstatus__item--age .catstatus__value {
+  font-weight: var(--weight-strong);
+}
+
+.catstatus__item--age[data-stale] .catstatus__value {
+  color: var(--tier-caution);
+}
+
+.catstatus__note {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-label);
+  color: var(--mute);
+}

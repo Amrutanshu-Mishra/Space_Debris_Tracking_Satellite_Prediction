@@ -1,0 +1,97 @@
+.ri {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.ri[data-tier="clear"] {
+  --ri: var(--tier-clear);
+}
+.ri[data-tier="caution"] {
+  --ri: var(--tier-caution);
+}
+.ri[data-tier="act"] {
+  --ri: var(--tier-act);
+}
+
+.ri__gauge {
+  position: relative;
+  flex: 0 0 auto;
+  width: 14px;
+  height: 22px;
+  border: 1px solid var(--ri);
+  background: var(--field);
+  overflow: hidden;
+}
+
+/* band threshold rules at 40% and 70% — read which band the fill reaches */
+.ri__gauge::before,
+.ri__gauge::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px dashed var(--rule);
+  pointer-events: none;
+}
+.ri__gauge::before {
+  bottom: 40%;
+}
+.ri__gauge::after {
+  bottom: 70%;
+}
+
+.ri__fill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--ri);
+}
+
+/* confidence band as texture: solid (high), fine hatch (reduced),
+   coarse hatch (low) — "unresolved" data literally looks unresolved */
+.ri[data-band="reduced"] .ri__fill {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent 0 2px,
+    var(--field) 2px 3px
+  );
+}
+.ri[data-band="low"] .ri__fill {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent 0 2px,
+    var(--field) 2px 4px
+  );
+}
+
+.ri__read {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  line-height: 1.25;
+  font-size: var(--text-label);
+}
+
+.ri__score {
+  color: var(--ink);
+}
+.ri[data-tier="act"] .ri__score {
+  font-weight: var(--weight-strong);
+}
+
+.ri__conf {
+  display: inline-flex;
+  gap: var(--space-2);
+  color: var(--mute);
+}
+.ri__letter {
+  color: var(--ri);
+  font-weight: var(--weight-strong);
+}
+.ri__warn {
+  color: var(--tier-caution);
+}

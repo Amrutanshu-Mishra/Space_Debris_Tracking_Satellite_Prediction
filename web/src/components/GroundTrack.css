@@ -1,0 +1,55 @@
+.gt {
+  margin: 0;
+  padding: var(--space-4);
+  background: var(--field);
+  border: var(--hairline);
+}
+
+.gt__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.gt__frame {
+  fill: none;
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+
+.gt__grat {
+  stroke: var(--rule);
+  stroke-width: 0.5;
+  opacity: 0.5;
+}
+
+.gt__coast {
+  fill: none;
+  stroke: var(--rule);
+  stroke-width: 0.75;
+  stroke-linejoin: round;
+}
+
+.gt__track {
+  fill: none;
+  stroke: var(--control);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.gt__tcadot {
+  fill: var(--ink);
+}
+
+.gt__tcaring {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1;
+}
+
+.gt__caption {
+  margin-top: var(--space-3);
+  font-size: var(--text-label);
+  color: var(--mute);
+}

@@ -1,14 +1,9 @@
-import { NavLink } from "react-router-dom";
+import { AppHeader } from "./Layout";
 
-// TODO(dashboard): replace with the real nav once the layout is designed.
+/**
+ * The masthead is now the whole nav frame — see Layout.tsx (DESIGN.md §3).
+ * This wrapper keeps App.tsx's `<NavBar />` mount point stable.
+ */
 export function NavBar(): JSX.Element {
-  return (
-    <nav className="navbar">
-      <span className="navbar__brand">PRAHARI</span>
-      <NavLink to="/" end>
-        Dashboard
-      </NavLink>
-      <NavLink to="/orbit">Orbit View</NavLink>
-    </nav>
-  );
+  return <AppHeader />;
 }
