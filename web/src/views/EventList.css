@@ -1,0 +1,25 @@
+.eventlist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.eventlist__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-4);
+}
+
+.eventlist__title {
+  margin: 0;
+  font-size: var(--text-title);
+  font-weight: var(--weight-strong);
+}
+
+.eventlist__count {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-label);
+  color: var(--mute);
+}
