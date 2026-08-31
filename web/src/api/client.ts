@@ -8,6 +8,10 @@ import type { CatalogObject } from "./types/object";
 import type { ConjunctionEvent } from "./types/conjunction";
 import type { CatalogStatus } from "./types/catalog_status";
 
+// In production the bundle is served by nginx, which proxies /api same-origin,
+// so BASE_URL is a root-relative path ("/api/v1"). In dev it's an absolute URL
+// to the local api service. Request URLs are therefore built by string
+// concatenation, not `new URL()` — the latter throws on a relative base.
 const BASE_URL: string = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api/v1";
 const WS_BASE_URL: string = import.meta.env.VITE_WS_BASE_URL ?? "ws://localhost:8000/api/v1";
 
@@ -41,15 +45,17 @@ class ApiError extends Error {
 }
 
 async function request<T>(path: string, params?: Record<string, string | number | undefined>): Promise<T> {
-  const url = new URL(`${BASE_URL}${path}`);
+  const query = new URLSearchParams();
   if (params) {
     for (const [key, value] of Object.entries(params)) {
-      if (value !== undefined) url.searchParams.set(key, String(value));
+      if (value !== undefined) query.set(key, String(value));
     }
   }
-  const res = await fetch(url.toString());
+  const qs = query.toString();
+  const url = `${BASE_URL}${path}${qs ? `?${qs}` : ""}`;
+  const res = await fetch(url);
   if (!res.ok) {
-    throw new ApiError(res.status, `${res.status} ${res.statusText} for ${url.pathname}`);
+    throw new ApiError(res.status, `${res.status} ${res.statusText} for ${path}`);
   }
   return (await res.json()) as T;
 }
@@ -82,8 +88,17 @@ export type StreamMessage =
   | { type: "snapshot"; data: ConjunctionEvent[] }
   | { type: "event"; data: ConjunctionEvent };
 
+// WS_BASE_URL is an absolute ws(s):// URL in dev and a root-relative path in
+// production; in the latter case resolve it against the current origin and map
+// the page scheme to ws/wss.
+function wsUrl(path: string): string {
+  if (/^wss?:\/\//.test(WS_BASE_URL)) return `${WS_BASE_URL}${path}`;
+  const scheme = window.location.protocol === "https:" ? "wss:" : "ws:";
+  return `${scheme}//${window.location.host}${WS_BASE_URL}${path}`;
+}
+
 export function openEventStream(onMessage: (msg: StreamMessage) => void): WebSocket {
-  const ws = new WebSocket(`${WS_BASE_URL}/stream`);
+  const ws = new WebSocket(wsUrl("/stream"));
   ws.onmessage = (ev) => {
     const msg = JSON.parse(ev.data) as StreamMessage;
     onMessage(msg);
