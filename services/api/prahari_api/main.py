@@ -2,18 +2,36 @@
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from prahari_api.config import get_settings
+from prahari_api.events import get_events
 from prahari_api.routers import catalog, conjunctions, health, objects, stream
 
 settings = get_settings()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    """Load and schema-validate the events file before serving a single request.
+
+    A missing file or any violation of
+    ``contracts/schemas/conjunction.schema.json`` raises here, which aborts
+    startup — the API never comes up serving data that fails the contract.
+    """
+    app.state.events_loaded = len(get_events())
+    yield
+
 
 app = FastAPI(
     title="PRAHARI API",
     description="Space situational awareness: catalogue, conjunctions, streaming alerts.",
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 app.add_middleware(

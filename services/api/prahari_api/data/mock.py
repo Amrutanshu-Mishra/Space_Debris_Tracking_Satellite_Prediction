@@ -19,6 +19,7 @@ from functools import lru_cache
 from prahari_orbital.models import CatalogObject, CatalogStatus, ConjunctionEvent
 
 from prahari_api.config import FIXTURES_DIR
+from prahari_api.events import get_events
 
 
 @lru_cache(maxsize=1)
@@ -27,10 +28,11 @@ def _load_objects() -> list[CatalogObject]:
     return [CatalogObject.model_validate(o) for o in raw]
 
 
-@lru_cache(maxsize=1)
 def _load_conjunctions() -> list[ConjunctionEvent]:
-    raw = json.loads((FIXTURES_DIR / "conjunctions.sample.json").read_text(encoding="utf-8"))
-    return [ConjunctionEvent.model_validate(e) for e in raw]
+    # Path resolution + schema validation + caching all live in
+    # prahari_api.events.get_events; the app's startup hook calls the same
+    # function and refuses to boot on a schema mismatch.
+    return get_events()
 
 
 @lru_cache(maxsize=1)

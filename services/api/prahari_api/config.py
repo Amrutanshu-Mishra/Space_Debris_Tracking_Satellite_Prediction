@@ -16,6 +16,10 @@ class Settings(BaseSettings):
 
     prahari_data_source: Literal["mock", "live"] = "mock"
 
+    # Mock mode reads this JSON array of screened events once at startup and
+    # holds it in memory. Overridable with PRAHARI_EVENTS_PATH.
+    prahari_events_path: Path = FIXTURES_DIR / "conjunctions.real.json"
+
     database_url: str = "postgresql+asyncpg://prahari:prahari@localhost:5432/prahari"
     redis_url: str = "redis://localhost:6379/0"
 
