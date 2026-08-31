@@ -10,7 +10,8 @@
     "lint": "eslint src --ext ts,tsx",
     "typecheck": "tsc -b --noEmit",
     "test": "vitest",
-    "format": "prettier --write \"src/**/*.{ts,tsx,css}\""
+    "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
+    "contracts": "json2ts ../contracts/schemas/object.schema.json -o src/api/types/object.d.ts && json2ts ../contracts/schemas/conjunction.schema.json -o src/api/types/conjunction.d.ts && json2ts ../contracts/schemas/catalog_status.schema.json -o src/api/types/catalog_status.d.ts"
   },
   "dependencies": {
     "react": "^18.3.1",

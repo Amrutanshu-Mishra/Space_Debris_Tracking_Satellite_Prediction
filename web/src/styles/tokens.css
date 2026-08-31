@@ -1,0 +1,106 @@
+/*
+ * tokens.css — the single source for every colour, type size, weight, and
+ * space used in the PRAHARI console. Values and rationale: web/DESIGN.md
+ * (§1 colour, §2 type). Nothing in the app should hard-code a hex value or
+ * a pixel size that could live here instead.
+ *
+ * Theme: light is the design. A "night console" dark variant follows the
+ * DESIGN.md footnote — full light palette on :root, dark overrides guarded
+ * so an explicit data-theme always wins.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* --- base palette (DESIGN.md §1) --------------------------------------- */
+  --paper: #f4f1e8;        /* app background — "the desk" */
+  --field: #fcfbf7;        /* table surface / read-out panels */
+  --ink: #1a1d21;          /* primary text and every numeral */
+  --mute: #585e66;         /* labels, units, date portions, secondary rows */
+  --rule: #c9c3b4;         /* every hairline — grid, dividers, panel edges */
+  --control: #1d4e6b;      /* interaction only: focus ring, selection, links.
+                              lines/underlines, never a fill */
+
+  /* --- risk tiers (DESIGN.md §1) --------------------------------------- */
+  --tier-clear: #3e7a5e;   /* GREEN  — muted pine */
+  --tier-caution: #b9791f; /* AMBER  — ochre */
+  --tier-act: #a5301f;     /* RED    — oxide */
+
+  /* tier tints: hue at ~10% over paper. the only fills in the UI —
+     risk_score cell background, the signature field's act-corner. */
+  --tier-clear-tint: rgba(62, 122, 94, 0.1);
+  --tier-caution-tint: rgba(185, 121, 31, 0.12);
+  --tier-act-tint: rgba(165, 48, 31, 0.1);
+
+  /* --- type (DESIGN.md §2) ------------------------------------------------ */
+  --font-sans: "IBM Plex Sans", system-ui, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+  --text-label: 12px;   /* column headers, filter controls, units */
+  --text-data: 13px;    /* table rows, body */
+  --text-title: 15px;   /* view titles */
+  --text-figure: 20px;  /* the one value that matters on the detail view */
+
+  --weight-normal: 400;
+  --weight-strong: 600; /* column headers, RED-tier risk_score only */
+
+  --leading-tight: 1.35; /* dense rows */
+  --leading-body: 1.5;
+
+  /* --- space & structure ----------------------------------------------- */
+  --space-1: 2px;
+  --space-2: 4px;
+  --space-3: 8px;
+  --space-4: 12px;
+  --space-5: 16px;
+  --space-6: 24px;
+  --space-7: 32px;
+
+  --row-height: 28px;        /* DESIGN.md §3 — ~28px worklist rows */
+  --radius: 0;               /* zero radius — a ledger, not a card wall */
+  --hairline: 1px solid var(--rule);
+  --focus-ring: 2px solid var(--control);
+  --focus-offset: 1px;
+}
+
+/* system dark, unless an explicit light theme is set */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --paper: #14171a;
+    --field: #1b1f23;
+    --ink: #e8e4d9;
+    --mute: #9aa0a6;
+    --rule: #3a3f45;
+    --control: #5aa7c8;
+
+    --tier-clear: #4a9e77;
+    --tier-caution: #d68c28;
+    --tier-act: #c6402c;
+
+    --tier-clear-tint: rgba(74, 158, 119, 0.16);
+    --tier-caution-tint: rgba(214, 140, 40, 0.18);
+    --tier-act-tint: rgba(198, 64, 44, 0.16);
+  }
+}
+
+/* explicit opt-in dark — wins over the system query in both directions */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --paper: #14171a;
+  --field: #1b1f23;
+  --ink: #e8e4d9;
+  --mute: #9aa0a6;
+  --rule: #3a3f45;
+  --control: #5aa7c8;
+
+  --tier-clear: #4a9e77;
+  --tier-caution: #d68c28;
+  --tier-act: #c6402c;
+
+  --tier-clear-tint: rgba(74, 158, 119, 0.16);
+  --tier-caution-tint: rgba(214, 140, 40, 0.18);
+  --tier-act-tint: rgba(198, 64, 44, 0.16);
+}
