@@ -1,10 +1,25 @@
-.PHONY: up down logs test lint seed fmt clean
+.PHONY: up down demo demo-offline logs test lint seed fmt clean
 
-up: ## Build and start the full demo stack (docker-compose)
+up: ## Build and start the demo stack (api + web), logs attached
 	docker compose up --build
 
 down: ## Stop the stack
 	docker compose down
+
+demo: ## Build, start detached, wait for the API health check, print the URL
+	docker compose up --build --detach --wait
+	@echo ""
+	@echo "  PRAHARI console : http://localhost:8080"
+	@echo "  API health      : http://localhost:8000/api/v1/health"
+	@echo ""
+
+demo-offline: ## Prove the running stack needs no network (compose net set internal)
+	docker compose build
+	docker compose -f docker-compose.yml -f docker-compose.offline.yml up --detach --wait
+	@echo ""
+	@echo "  stack healthy with the compose network cut off from the internet"
+	@echo "  PRAHARI console : http://localhost:8080"
+	@echo ""
 
 logs: ## Tail logs from all services
 	docker compose logs -f

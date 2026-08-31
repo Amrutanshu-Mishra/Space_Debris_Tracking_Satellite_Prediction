@@ -115,22 +115,51 @@ disabled, documented interface for the day covariance data (e.g. real CDMs)
 is available. See `CLAUDE.md` if you're extending this code and are
 tempted to add one back.
 
-## One-command start
+## Run
+
+The demo runs on Docker Compose. One command:
 
 ```bash
-cp .env.example .env
-make up
+make demo
 ```
 
-This builds and starts `api`, `worker`, `db`, `redis`, and `web` via
-docker-compose, with `PRAHARI_DATA_SOURCE=mock` by default — the API serves
-`contracts/fixtures/` end-to-end with no external network calls. Visit
-`http://localhost:5173` for the dashboard, `http://localhost:8000/api/v1/health`
-for the API.
+This builds two containers — `api` and `web` — starts them, waits for the
+API health check, and prints the URL. Then open:
 
-Switch to the real pipeline with `PRAHARI_DATA_SOURCE=live` in `.env` once
-`services/orbital` and `services/worker` are implemented (see the
-workstreams below).
+- **http://localhost:8080** — the operator console
+- **http://localhost:8000/api/v1/health** — the API
+
+`make up` does the same in the foreground with logs attached; `make down`
+stops everything. There is no `.env` to copy and no database to provision —
+the API runs in `mock` mode and serves the screened-events fixture from
+`contracts/fixtures/`.
+
+### Offline by design
+
+The venue network is assumed hostile. Nothing in the running stack reaches
+the internet:
+
+- the screened-events JSON is **baked into the `api` image** (and also
+  mounted from `contracts/` read-only) — nothing fetches CelesTrak at
+  runtime;
+- the web bundle carries its **own fonts, CSS, and the ground-track world
+  outline** — no CDN, no Google Fonts, no map tile service;
+- nginx in the `web` container **proxies `/api`** to the `api` service, so
+  the browser only makes same-origin requests and CORS is a non-issue.
+
+Prove it: `make demo-offline` builds the images, then brings the stack up on
+a Compose network with `internal: true` — no route to the internet. If the
+health checks pass there, nothing external is needed.
+
+### Why Compose and not Kubernetes
+
+The manifests in [`k8s/`](k8s/) are a deck artifact — a Deployment and
+Service per component, an HPA on the API, and an Ingress — showing the
+scaling path if this ran as a hosted service. The demonstration itself runs
+on Compose: it is two stateless containers on one laptop, it starts with one
+command, and it has no control plane, ingress controller, or image registry
+to fail on a conference-room network. Same two containers, three fewer
+things that can break.
 
 ## The six workstreams
 
