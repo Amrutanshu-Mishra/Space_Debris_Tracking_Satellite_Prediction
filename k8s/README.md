@@ -7,7 +7,9 @@ and are not deployed, tested, or exercised during the hackathon.
 
 - `deployment-api.yaml`, `deployment-worker.yaml`, `deployment-web.yaml` —
   Deployments for the three custom images.
-- `service-api.yaml`, `service-web.yaml` — ClusterIP/LoadBalancer Services.
+- `service-api.yaml`, `service-web.yaml` — ClusterIP Services.
+- `ingress.yaml` — one host, `/api/*` to the API and everything else to the
+  web bundle, mirroring the nginx proxy on the Compose path.
 - `hpa-api.yaml` — HorizontalPodAutoscaler for the API on CPU utilisation.
 - `cronjob-screening.yaml` — the worker's 6-hourly refresh+screen cycle,
   expressed as a Kubernetes CronJob instead of Celery Beat (an alternative

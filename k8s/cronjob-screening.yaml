@@ -1,4 +1,5 @@
-# Scalability artifact only — not on the demo path. See k8s/README.md.
+# Deck artifact — shows the scaling path only. The demonstration runs on
+# Docker Compose (root docker-compose.yml), never on Kubernetes.
 # An alternative to Celery Beat: expresses the 6-hourly refresh+screen cycle
 # as a Kubernetes CronJob. Not used in the demo, where Celery Beat inside
 # the worker Deployment owns the schedule.

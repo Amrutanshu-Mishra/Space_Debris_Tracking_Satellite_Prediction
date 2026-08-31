@@ -1,4 +1,5 @@
-# Scalability artifact only — not on the demo path. See k8s/README.md.
+# Deck artifact — shows the scaling path only. The demonstration runs on
+# Docker Compose (root docker-compose.yml), never on Kubernetes.
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:

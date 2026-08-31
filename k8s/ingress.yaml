@@ -1,0 +1,32 @@
+# Deck artifact — shows the scaling path only. The demonstration runs on
+# Docker Compose (root docker-compose.yml), never on Kubernetes.
+#
+# One host, two backends: /api/* to the API Service, everything else to the
+# web Service. This mirrors what nginx does inside the web container on the
+# Compose path — the browser still only ever talks to one origin.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: prahari
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: prahari.PLACEHOLDER_DOMAIN
+      http:
+        paths:
+          # path is passed through unchanged so /api/v1/... reaches the API
+          # exactly as mounted — no rewrite annotation.
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: prahari-api
+                port:
+                  number: 80
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: prahari-web
+                port:
+                  number: 80

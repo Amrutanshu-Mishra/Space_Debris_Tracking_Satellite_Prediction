@@ -1,4 +1,5 @@
-# Scalability artifact only — not on the demo path. See k8s/README.md.
+# Deck artifact — shows the scaling path only. The demonstration runs on
+# Docker Compose (root docker-compose.yml), never on Kubernetes.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -17,14 +18,18 @@ spec:
     spec:
       containers:
         - name: web
+          # nginx serving the built bundle; API base URL is baked at build
+          # time as the same-origin path /api/v1 (see web/Dockerfile), so
+          # there is no runtime config here.
           image: ghcr.io/PLACEHOLDER_ORG/prahari-web:latest
           ports:
-            - containerPort: 5173
-          env:
-            - name: VITE_API_BASE_URL
-              value: "https://api.PLACEHOLDER_DOMAIN/api/v1"
-            - name: VITE_WS_BASE_URL
-              value: "wss://api.PLACEHOLDER_DOMAIN/api/v1"
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 3
+            periodSeconds: 10
           resources:
             requests:
               cpu: "100m"
