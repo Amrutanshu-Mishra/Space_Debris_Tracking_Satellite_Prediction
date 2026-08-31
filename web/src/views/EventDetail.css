@@ -1,0 +1,103 @@
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.detail__crumb {
+  margin: 0;
+  font-size: var(--text-label);
+}
+
+.detail__head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.detail__title {
+  margin: 0;
+  font-size: var(--text-title);
+  font-weight: var(--weight-strong);
+}
+
+.detail__x {
+  color: var(--mute);
+  padding: 0 var(--space-1);
+}
+
+.detail__id {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  color: var(--mute);
+}
+
+/* the encounter plane is the one loud element — give it the width */
+.detail__plane {
+  max-width: 460px;
+}
+
+.detail__grid {
+  display: grid;
+  grid-template-columns: minmax(16rem, 22rem) 1fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+@media (max-width: 700px) {
+  .detail__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.detail__facts {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.detail__facts > div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.detail__facts > div:last-child {
+  border-bottom: 0;
+}
+
+.detail__facts dt {
+  font-size: var(--text-label);
+  color: var(--mute);
+}
+
+.detail__facts dd {
+  margin: 0;
+  text-align: right;
+}
+
+.detail__facts dd.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.detail__norad {
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  color: var(--mute);
+}
+
+.detail__rel {
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  color: var(--mute);
+}
+
+.detail__tier {
+  font-family: var(--font-sans);
+  font-size: var(--text-label);
+  color: var(--mute);
+}
