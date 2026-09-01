@@ -13,22 +13,32 @@ COARSE SWEEP
     the 10 km threshold is *not* safe: two objects closing at 15 km/s move
     ~900 km between 60 s samples, so a sub-kilometre true miss can read as
     hundreds of km at every sample and be discarded — a silent missed warning.
-    So each pass pads the threshold by the largest distance the separation can
-    move between samples. The true minimum lies within ``dt / 2`` of some
-    sample and separation changes at no more than the relative speed, hence::
+    So each pass compares the threshold against a rigorous *lower bound* on the
+    pair's true separation, not the raw samples.
 
-        keep pair if  d_sampled < threshold + v_bound * (dt / 2)
+    That lower bound is the **linear-chord** bound. Between two consecutive
+    samples the relative-position curve is replaced by the straight chord
+    joining its endpoints; the separation along that chord is a quadratic in
+    the sub-step fraction and is minimised in closed form
+    (:func:`_segment_min_sq_per_sample`). The true curved path departs from the
+    chord by no more than the **sagitta** ``a_rel * dt**2 / 8`` — see
+    ``_A_REL_MAX_KM_S2`` below for the derivation and the exact pad — so::
 
-    ``v_bound(i, j) = v_max[i] + v_max[j]`` (triangle inequality), with
-    ``v_max`` each object's peak speed over the window — O(n_objects), computed
-    once from the ephemeris velocity array, never per-pair across all steps.
+        keep pair if  chord_min_separation - sagitta_pad < threshold
+
+    is a strict test: no true sub-threshold approach can be dropped. The pad is
+    a second-order quantity in ``dt`` (~8 km at 60 s), where the older
+    ``v_bound * dt / 2`` first-order pad was ~450 km and forwarded ~99.8 % of
+    its survivors to a brentq refinement that then rejected them.
 
     ``screen_candidates`` (batch) runs this as three passes; ``screen_pair``
     (one pair) runs the single-pass equivalent:
 
-      * PASS 1 — stride 5 (dt = 300 s), pad ``v_bound * 150``; gates every pair.
-      * PASS 2 — stride 1 (dt = 60 s), pad ``v_bound * 30``; pass-1 survivors
-        only. Every local minimum of the padded curve is a candidate TCA.
+      * PASS 1 — stride 5 (dt = 300 s), chord bound, pad
+        ``_PASS1_SAGITTA_PAD_KM``; gates every pair.
+      * PASS 2 — stride 1 (dt = 60 s), chord bound, pad
+        ``_PASS2_SAGITTA_PAD_KM``; pass-1 survivors only. Every local minimum
+        of the padded per-sample bound is a candidate TCA.
       * PASS 3 — brentq refinement (below) of each pass-2 local minimum.
 
     Each pass is rigorous: any pair carried forward is guaranteed to include
@@ -90,13 +100,48 @@ _TCA_XTOL_SECONDS = 1e-6
 #: COARSE_STEP_SECONDS = 300 s. Pass 2 runs at full resolution (stride 1).
 _PASS1_STRIDE = 5
 
-#: Pair-chunk sizes for the two vectorised sweeps, sized so one chunk's
-#: (n_pairs, n_steps) float32 squared-distance array is ~200 MB:
-#:   pass 1  -> ~865 steps  -> 50_000 pairs  (~0.17 GB)
-#:   pass 2  -> ~4321 steps -> 10_000 pairs  (~0.17 GB)
+#: Pair-chunk sizes for the two vectorised sweeps. The chord bound holds two
+#: (n_pairs, n_steps, 3) float32 relative-position arrays live at once (segment
+#: starts + segment vectors), so a chunk is sized for ~0.5 GB of those:
+#:   pass 1  -> ~865 steps  -> 15_000 pairs
+#:   pass 2  -> ~4321 steps ->  5_000 pairs
 #: Deliberately not one shared value — the step counts differ 5x.
-_PASS1_PAIR_CHUNK = 50_000
-_PASS2_PAIR_CHUNK = 10_000
+_PASS1_PAIR_CHUNK = 15_000
+_PASS2_PAIR_CHUNK = 5_000
+
+#: Upper bound on the magnitude of the *relative* acceleration of any two
+#: catalogue objects, km/s^2. Each object's acceleration is dominated by Earth
+#: gravity, |r_ddot| = GM / r^2 with GM = 398_600 km^3/s^2; the smallest radius
+#: we ever propagate is ~6_600 km (a ~220 km-altitude LEO about to decay),
+#: giving GM / r^2 = 398_600 / 6_600^2 = 9.15e-3 km/s^2 per object. The
+#: relative acceleration is bounded by the sum of the two, <= 1.83e-2 km/s^2;
+#: rounded up to 2.0e-2 to also cover J2 (~1e-5 of the central term), drag, and
+#: any object dipping briefly below 220 km before it is dropped.
+_A_REL_MAX_KM_S2 = 2.0e-2
+
+#: Sagitta pad for the linear-chord bound, kilometres.
+#:
+#: DERIVATION. Over one grid step of length ``dt`` replace each object's path
+#: by the straight chord between its two sampled endpoints. For a body with
+#: bounded acceleration ``|r_ddot| <= a`` the displacement of the true path
+#: from that chord is ``r(t) - chord(t) = 0.5 * a * t * (t - dt)`` in the
+#: worst (constant-acceleration) case, whose magnitude peaks at ``t = dt/2``
+#: at ``a * dt**2 / 8``. Applied to the *relative* path (acceleration bounded
+#: by ``_A_REL_MAX_KM_S2``), the analytically minimised chord separation is
+#: therefore within ``_A_REL_MAX_KM_S2 * dt**2 / 8`` of the true minimum
+#: separation over that step. Subtracting this pad before the threshold test
+#: makes the sweep a **strict lower bound** on true separation — it can only
+#: keep pairs that should be kept, never drop a real sub-threshold approach.
+#: It is a bound on the discrete-sampling error, not a tuned fudge factor.
+#:
+#:   pass 2, dt =  60 s:  2.0e-2 * 60**2  / 8 =   9.0 km  -> use 12 km
+#:   pass 1, dt = 300 s:  2.0e-2 * 300**2 / 8 = 225.0 km  -> use 240 km
+#:
+#: The round-ups (12 vs 9.0, 240 vs 225) leave headroom for the float32
+#: position round-off in the sweep (sub-metre at LEO radii) and for the
+#: acceleration bound itself being an estimate rather than a hard limit.
+_PASS1_SAGITTA_PAD_KM = 240.0
+_PASS2_SAGITTA_PAD_KM = 12.0
 
 
 @dataclass(frozen=True)
@@ -352,12 +397,14 @@ def _local_minima_below_sq(
     """Squared-distance analogue of :func:`_sub_threshold_local_minima`.
 
     A point ``i`` qualifies when ``d2[i] < d2[i-1]``, ``d2[i] <= d2[i+1]`` and
-    ``d2[i] <= padded_threshold_sq``. ``padded_threshold_sq`` is
-    ``(threshold_km + v_bound * dt / 2) ** 2`` for the pair — the squared,
-    closure-padded screening threshold — so no true sub-threshold minimum is
-    dropped before refinement. Same strict-left / non-strict-right rule (a
-    plateau counts once); indices 0 and ``n-1`` are never reported, so every
-    returned ``i`` has valid ``i-1`` / ``i+1`` neighbours for bracketing.
+    ``d2[i] <= padded_threshold_sq``. In ``screen_candidates`` the input row is
+    the per-sample linear-chord lower bound and ``padded_threshold_sq`` is
+    ``(threshold_km + _PASS2_SAGITTA_PAD_KM) ** 2`` — so a minimum is carried
+    to refinement whenever the pair's true separation there *could* be below
+    the screening threshold, and no true sub-threshold minimum is dropped.
+    Same strict-left / non-strict-right rule (a plateau counts once); indices
+    0 and ``n-1`` are never reported, so every returned ``i`` has valid
+    ``i-1`` / ``i+1`` neighbours for bracketing.
     """
     n = d2_row.size
     if n < 3:
@@ -367,6 +414,48 @@ def _local_minima_below_sq(
     is_minimum = (here < d2_row[interior - 1]) & (here <= d2_row[interior + 1])
     below = here <= padded_threshold_sq
     return [int(i) for i in interior[is_minimum & below]]
+
+
+def _segment_min_sq_per_sample(rel_km: np.ndarray) -> np.ndarray:
+    """Per-sample lower bound (squared, km^2) on a pair's true separation.
+
+    The linear-chord bound (see the module docstring's COARSE SWEEP section).
+
+    Args:
+        rel_km: sampled relative-position vectors, shape ``(m, S, 3)`` — one
+            row per pair, ``S`` grid samples, GCRS km (secondary minus
+            primary; the sign is irrelevant, only the norm is used).
+
+    Returns:
+        ``(m, S)`` array. Column ``t`` is the smaller of the two analytic
+        chord-separation minima on the segments ``[t-1, t]`` and ``[t, t+1]``
+        (only the forward segment at ``t = 0``, only the backward one at the
+        last sample). Always ``<=`` the sampled ``|rel_km[:, t]|**2``, and a
+        lower bound on the true squared separation over ``[t-1, t+1]`` once the
+        caller subtracts ``_A_REL_MAX_KM_S2 * dt**2 / 8`` (in distance, from
+        the sqrt). Same dtype as ``rel_km`` (float32 in the sweeps).
+
+    Units/frame: input km, GCRS; output km^2. No frame maths here.
+    """
+    a0 = rel_km[:, :-1, :]  # (m, S-1, 3) segment start offsets
+    dd = rel_km[:, 1:, :] - a0  # (m, S-1, 3) segment step vectors
+    a0a0 = np.einsum("msi,msi->ms", a0, a0)
+    a0dd = np.einsum("msi,msi->ms", a0, dd)
+    dd2 = np.einsum("msi,msi->ms", dd, dd)
+    # Minimiser of |a0 + t*dd|^2 on t in [0, 1]; dd2 == 0 (coincident samples)
+    # falls back to the endpoint, t = 0.
+    with np.errstate(invalid="ignore", divide="ignore"):
+        tstar = np.where(dd2 > 0.0, -a0dd / dd2, 0.0)
+    np.clip(tstar, 0.0, 1.0, out=tstar)
+    seg_sq = a0a0 + 2.0 * tstar * a0dd + tstar * tstar * dd2
+    # float32 cancellation can push a near-zero minimum slightly negative.
+    np.maximum(seg_sq, 0.0, out=seg_sq)
+
+    out = np.empty(rel_km.shape[:2], dtype=seg_sq.dtype)
+    out[:, 0] = seg_sq[:, 0]
+    out[:, -1] = seg_sq[:, -1]
+    np.minimum(seg_sq[:, :-1], seg_sq[:, 1:], out=out[:, 1:-1])
+    return out
 
 
 def screen_pair(
@@ -457,23 +546,22 @@ def screen_candidates(
     All referenced objects are re-propagated **once**, together, on the coarse
     grid (:func:`prahari_orbital.propagate.propagate_catalog`), then every pair
     is swept against that shared ``(n_objects, n_steps, 3)`` position array in
-    the three padded passes described in the module docstring:
+    the three passes described in the module docstring:
 
-      1. stride 5 (dt = 300 s), threshold padded by ``v_bound * 150`` — gates
-         every pair;
-      2. stride 1 (dt = 60 s), threshold padded by ``v_bound * 30`` — pass-1
-         survivors only; every local minimum of the padded squared-distance
-         curve is a candidate TCA;
+      1. stride 5 (dt = 300 s), linear-chord lower bound minus
+         ``_PASS1_SAGITTA_PAD_KM`` — gates every pair;
+      2. stride 1 (dt = 60 s), linear-chord lower bound minus
+         ``_PASS2_SAGITTA_PAD_KM`` — pass-1 survivors only; every local minimum
+         of that per-sample bound is a candidate TCA;
       3. :func:`find_tca` / brentq refinement of each pass-2 local minimum.
 
-    The padding (``v_bound = v_max[i] + v_max[j]``, from each object's peak
-    speed over the window) guarantees no true sub-``threshold_km`` approach is
-    dropped by grid sampling. A refined approach is kept only when its exact
-    miss distance is below ``threshold_km`` — padded selection cannot inflate
-    the event count. Passes 1–2 run in float32 squared distance, chunked to
-    ~0.2 GB per sweep (``_PASS1_PAIR_CHUNK`` / ``_PASS2_PAIR_CHUNK``);
-    refinement is float64. Survivor count and wall time are printed to stderr
-    after each pass.
+    The chord bound (:func:`_segment_min_sq_per_sample`) minus the sagitta pad
+    is a strict lower bound on true separation, so no true sub-``threshold_km``
+    approach is dropped by grid sampling. A refined approach is kept only when
+    its exact miss distance is below ``threshold_km`` — widening the net cannot
+    inflate the event count. Passes 1–2 run in float32, chunked
+    (``_PASS1_PAIR_CHUNK`` / ``_PASS2_PAIR_CHUNK``); refinement is float64.
+    Survivor count and wall time are printed to stderr after each pass.
 
     A pair with several approaches across the window contributes several
     :class:`ScreeningResult`\\ s.
@@ -567,54 +655,55 @@ def screen_candidates(
     n_pairs = rows.shape[0]
 
     # float32 positions for the two sweeps (sub-metre at LEO radii, negligible
-    # against a padded threshold of hundreds of km); the per-object speed
-    # bound stays float64.
+    # against the sagitta pad); the chord bound reads positions only, never
+    # velocity.
     pos32 = np.ascontiguousarray(ephem.position_km, dtype=np.float32)
-    v_max = np.linalg.norm(ephem.velocity_km_s, axis=2).max(axis=1)  # (n_obj,) km/s
-    v_bound = v_max[pi] + v_max[pj]  # (n_pairs,) km/s, triangle-inequality bound
 
-    # 3. PASS 1 -- stride 5, dt = 300 s. Gates every pair.
+    # 3. PASS 1 -- stride 5, dt = 300 s. Gates every pair on the linear-chord
+    #    lower bound (see module docstring + _segment_min_sq_per_sample).
     stride = _PASS1_STRIDE
     dt1 = coarse_step_seconds * stride
-    thr1_sq = (threshold_km + v_bound * (dt1 / 2.0)) ** 2  # (n_pairs,)
     pos1 = pos32[:, ::stride, :]
+    thr1 = threshold_km + _PASS1_SAGITTA_PAD_KM  # keep pair if chord_min <= this
 
     survivor = np.zeros(n_pairs, dtype=bool)
     t0 = time.perf_counter()
     for lo in range(0, n_pairs, _PASS1_PAIR_CHUNK):
         sl = slice(lo, lo + _PASS1_PAIR_CHUNK)
-        cpi, cpj = pi[sl], pj[sl]
-        d2 = (pos1[cpi, :, 0] - pos1[cpj, :, 0]) ** 2
-        d2 += (pos1[cpi, :, 1] - pos1[cpj, :, 1]) ** 2
-        d2 += (pos1[cpi, :, 2] - pos1[cpj, :, 2]) ** 2
-        survivor[sl] = d2.min(axis=1).astype(np.float64) <= thr1_sq[sl]
+        rel = pos1[pi[sl]] - pos1[pj[sl]]  # (m, n1, 3) float32
+        chord_min = np.sqrt(
+            _segment_min_sq_per_sample(rel).min(axis=1).astype(np.float64)
+        )
+        survivor[sl] = chord_min <= thr1
     pass1_idx = np.nonzero(survivor)[0]
     print(
-        f"[screen_candidates] pass 1 (stride {stride}, dt {dt1:g}s): "
+        f"[screen_candidates] pass 1 (stride {stride}, dt {dt1:g}s, "
+        f"chord bound -{_PASS1_SAGITTA_PAD_KM:g}km): "
         f"{pass1_idx.size}/{n_pairs} pairs kept, "
         f"{time.perf_counter() - t0:.3f}s",
         file=sys.stderr,
     )
 
-    # 4. PASS 2 -- stride 1, dt = 60 s, pass-1 survivors only.
+    # 4. PASS 2 -- stride 1, dt = 60 s, pass-1 survivors only. Full-resolution
+    #    chord bound; each local minimum of the per-sample bound that clears
+    #    the sagitta-corrected threshold is a candidate TCA for brentq.
     dt2 = coarse_step_seconds
-    thr2_sq = (threshold_km + v_bound * (dt2 / 2.0)) ** 2  # (n_pairs,)
+    cap2_km = threshold_km + _PASS2_SAGITTA_PAD_KM
+    cap2_sq = cap2_km * cap2_km
 
     refine_jobs: list[tuple[int, list[int]]] = []
     t0 = time.perf_counter()
     for lo in range(0, pass1_idx.size, _PASS2_PAIR_CHUNK):
         block = pass1_idx[lo : lo + _PASS2_PAIR_CHUNK]
-        cpi, cpj = pi[block], pj[block]
-        d2 = (pos32[cpi, :, 0] - pos32[cpj, :, 0]) ** 2
-        d2 += (pos32[cpi, :, 1] - pos32[cpj, :, 1]) ** 2
-        d2 += (pos32[cpi, :, 2] - pos32[cpj, :, 2]) ** 2  # (m, n_steps) float32
-        cap = thr2_sq[block]
-        for k in np.nonzero(d2.min(axis=1).astype(np.float64) <= cap)[0]:
-            minima = _local_minima_below_sq(d2[k], float(cap[k]))
+        rel = pos32[pi[block]] - pos32[pj[block]]  # (m, n_steps, 3) float32
+        d2lb = _segment_min_sq_per_sample(rel).astype(np.float64)  # (m, n_steps)
+        for k in np.nonzero(d2lb.min(axis=1) <= cap2_sq)[0]:
+            minima = _local_minima_below_sq(d2lb[k], cap2_sq)
             if minima:
                 refine_jobs.append((int(block[k]), minima))
     print(
-        f"[screen_candidates] pass 2 (stride 1, dt {dt2:g}s): "
+        f"[screen_candidates] pass 2 (stride 1, dt {dt2:g}s, "
+        f"chord bound -{_PASS2_SAGITTA_PAD_KM:g}km): "
         f"{len(refine_jobs)}/{pass1_idx.size} pairs kept, "
         f"{time.perf_counter() - t0:.3f}s",
         file=sys.stderr,

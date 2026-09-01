@@ -86,12 +86,14 @@ async function request<T>(path: string, params?: Record<string, string | number 
   const url = new URL(`${BASE_PATH}${path}`, window.location.origin);
   if (params) {
     for (const [key, value] of Object.entries(params)) {
-      if (value !== undefined) url.searchParams.set(key, String(value));
+      if (value !== undefined) query.set(key, String(value));
     }
   }
-  const res = await fetch(url.toString());
+  const qs = query.toString();
+  const url = `${BASE_URL}${path}${qs ? `?${qs}` : ""}`;
+  const res = await fetch(url);
   if (!res.ok) {
-    throw new ApiError(res.status, `${res.status} ${res.statusText} for ${url.pathname}`);
+    throw new ApiError(res.status, `${res.status} ${res.statusText} for ${path}`);
   }
   return (await res.json()) as T;
 }
