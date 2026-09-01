@@ -6,3 +6,5 @@ vite.config.d.ts
 .git
 .gitignore
 .dockerignore
+.env
+.env.*
