@@ -15,6 +15,6 @@ async def health() -> dict[str, str | int]:
     settings = get_settings()
     return {
         "status": "ok",
-        "data_source": settings.prahari_data_source,
+        "data_source": "live" if settings.use_database else "mock",
         "events_loaded": len(get_events()),
     }

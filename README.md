@@ -151,6 +151,48 @@ Prove it: `make demo-offline` builds the images, then brings the stack up on
 a Compose network with `internal: true` — no route to the internet. If the
 health checks pass there, nothing external is needed.
 
+### Storage design
+
+Persistence is **optional**. With no `DATABASE_URL` the API serves every
+endpoint from the screened-events JSON held in memory — this is the demo
+path, and it keeps working with no database container in sight. Set
+`DATABASE_URL` (via `make demo-storage`, which also starts Postgres, Redis,
+and a one-shot `loader`) and the same routes are served from Postgres by a
+repository that returns the identical Pydantic models, so the routers can't
+tell the difference.
+
+**The tables don't mirror the wire format.** `contracts/schemas/` is the
+shape the API *emits*; the schema is normalised for what the database is
+good at:
+
+- A `ConjunctionEvent` nests `primary` / `secondary` object refs. The
+  `conjunctions` table stores `primary_norad_id` / `secondary_norad_id`
+  foreign keys into `objects` instead and joins the names back on read — the
+  refs aren't duplicated across 40+ events, and a name correction lands in
+  one place.
+- `CatalogStatus` has no table. Its funnel counters (`pairs_considered`,
+  `events_found`, …) live on `screening_runs`, one row per ingest; its
+  epoch-age distribution is computed from `objects.epoch` when asked.
+- The list view filters on TCA window, tier, and score, so `tca`,
+  `risk_tier`, and `risk_score` are indexed.
+
+**`epoch_age_hours` is computed, never stored.** It means "hours between the
+TLE epoch and *now*" — a number that is wrong within a second of being
+written. Only `epoch` (an absolute instant) goes in the `objects` table; the
+age is derived from `epoch` and the wall clock every time an object is
+serialised. Storing it would just be a cache with no invalidation.
+
+`max_epoch_age_hours` on a conjunction *is* stored: it's the age at the
+moment of screening, a property of that screening run, not a live value.
+
+The per-event geometry response (both objects re-propagated with SGP4 around
+TCA) is genuinely expensive, so it's cached in Redis keyed by `event_id`
+with a one-hour TTL. If Redis is down the request still succeeds — it logs a
+warning and computes directly.
+
+Schema changes go through Alembic (`cd services/api && alembic upgrade
+head`); the `loader` service runs that migration before ingesting.
+
 ### Why Compose and not Kubernetes
 
 The manifests in [`k8s/`](k8s/) are a deck artifact — a Deployment and

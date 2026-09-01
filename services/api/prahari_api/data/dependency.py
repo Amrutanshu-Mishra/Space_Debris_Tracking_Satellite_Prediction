@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from prahari_api.config import get_settings
 from prahari_api.data.base import DataSource
-from prahari_api.data.live import LiveDataSource
 from prahari_api.data.mock import MockDataSource
 
 _data_source: DataSource | None = None
@@ -18,7 +17,13 @@ def get_data_source() -> DataSource:
     global _data_source
     if _data_source is None:
         settings = get_settings()
-        _data_source = MockDataSource() if settings.prahari_data_source == "mock" else LiveDataSource(settings)
+        if settings.use_database:
+            # Imported lazily so mock mode never needs the DB/Redis deps.
+            from prahari_api.data.live import LiveDataSource
+
+            _data_source = LiveDataSource(settings)
+        else:
+            _data_source = MockDataSource()
     return _data_source
 
 
