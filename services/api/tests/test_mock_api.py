@@ -5,8 +5,17 @@ mock data layer is the one part of the skeleton that is fully implemented.
 from __future__ import annotations
 
 import os
+from pathlib import Path
 
 os.environ.setdefault("PRAHARI_DATA_SOURCE", "mock")
+# Pin to the curated 40-event sample. conjunctions.real.json is now real
+# screening output — its event count and tier mix depend on the catalogue
+# snapshot and the run time, so exact-count assertions below must not run
+# against it.
+os.environ.setdefault(
+    "PRAHARI_EVENTS_PATH",
+    str(Path(__file__).resolve().parents[3] / "contracts" / "fixtures" / "conjunctions.sample.json"),
+)
 
 from fastapi.testclient import TestClient
 

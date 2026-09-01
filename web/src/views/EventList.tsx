@@ -36,15 +36,22 @@ export function EventList(): JSX.Element {
   const { sort, filters } = useMemo(() => parseQuery(params), [params]);
 
   const [all, setAll] = useState<ConjunctionEvent[] | null>(null);
+  // Total events in the screening run (page.total), which can exceed the
+  // number fetched/displayed — the header reports this as "screened".
+  const [screenedCount, setScreenedCount] = useState(0);
   const [error, setError] = useState<unknown>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const load = useCallback(() => {
     setError(null);
     setAll(null);
+    setScreenedCount(0);
     api
       .listConjunctions({ limit: 500 })
-      .then((page) => setAll(page.items))
+      .then((page) => {
+        setAll(page.items);
+        setScreenedCount(page.total);
+      })
       .catch(setError);
   }, []);
 
@@ -79,7 +86,7 @@ export function EventList(): JSX.Element {
       <header className="eventlist__head">
         <h1 className="eventlist__title">Conjunctions</h1>
         <p className="eventlist__count" aria-live="polite">
-          {all ? `${rows.length} shown of ${all.length} screened` : " "}
+          {all ? `${rows.length} shown of ${screenedCount} screened` : " "}
         </p>
       </header>
 
