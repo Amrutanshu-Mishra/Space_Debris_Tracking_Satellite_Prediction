@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -11,6 +12,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from prahari_api.config import get_settings
 from prahari_api.events import get_events
 from prahari_api.routers import catalog, conjunctions, health, objects, stream
+
+logger = logging.getLogger("prahari_api")
 
 settings = get_settings()
 
@@ -22,7 +25,20 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     A missing file or any violation of
     ``contracts/schemas/conjunction.schema.json`` raises here, which aborts
     startup — the API never comes up serving data that fails the contract.
+
+    Also logs, at INFO, which mode each subsystem resolved to (see
+    ``Settings.startup_summary``), so the running configuration is visible in
+    the logs without any environment inspection.
     """
+    # uvicorn configures the "uvicorn" logger tree but not application
+    # loggers; make sure ours reaches the same stream at INFO.
+    if not logging.getLogger().handlers and not logger.handlers:
+        logging.basicConfig(level=logging.INFO)
+    logger.setLevel(logging.INFO)
+
+    for line in settings.startup_summary():
+        logger.info("startup | %s", line)
+
     app.state.events_loaded = len(get_events())
     yield
 

@@ -14,6 +14,18 @@
 # are built the stack runs fully offline — see `make demo` and, for proof,
 # `make demo-offline`. The manifests in k8s/ are a deck artifact only; the
 # demonstration never runs on Kubernetes.
+#
+# Persistence is opt-in and lives behind the `storage` compose profile:
+#
+#   docker compose --profile storage up --build
+#
+# That adds `db` (postgres), `redis`, and a one-shot `loader` (runs the
+# Alembic migration + `python -m prahari_api.load` once postgres is healthy),
+# and points `api` at postgres via DATABASE_URL / REDIS_URL. With the profile
+# off — the default `make demo` path — `api` runs exactly as before: mock
+# mode, no database, no broker. The api service also starts fine if postgres
+# and redis are simply stopped; an unset DATABASE_URL falls back to the JSON
+# fixture and an unreachable Redis degrades to no geometry cache.
 
 services:
   api:
@@ -22,9 +34,11 @@ services:
       dockerfile: services/api/Dockerfile
     image: prahari/api:demo
     restart: unless-stopped
-    environment:
-      PRAHARI_DATA_SOURCE: mock
-      PRAHARI_EVENTS_PATH: /app/contracts/fixtures/conjunctions.real.json
+    # No environment block: every setting has a working default (see
+    # services/api/prahari_api/config.py). With nothing set the API serves
+    # the fixture mounted at /app/contracts in mock mode. Postgres/Redis are
+    # switched on only by docker-compose.storage.yml (the `storage` profile),
+    # which injects DATABASE_URL / REDIS_URL there.
     ports:
       - "8000:8000"
     volumes:
@@ -57,3 +71,61 @@ services:
       timeout: 3s
       retries: 5
       start_period: 5s
+
+  # --- opt-in persistence (compose profile: storage) -----------------------
+  # `docker compose --profile storage up --build` brings these up and, with
+  # docker-compose.storage.yml layered on, points `api` at postgres.
+
+  db:
+    image: postgres:16-alpine
+    profiles: ["storage"]
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-prahari}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-prahari}
+      POSTGRES_DB: ${POSTGRES_DB:-prahari}
+    ports:
+      - "5432:5432"
+    volumes:
+      - prahari_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-prahari} -d ${POSTGRES_DB:-prahari}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 5s
+
+  redis:
+    image: redis:7-alpine
+    profiles: ["storage"]
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 3s
+
+  loader:
+    build:
+      context: .
+      dockerfile: services/api/Dockerfile
+    image: prahari/api:demo
+    profiles: ["storage"]
+    restart: "no"
+    command:
+      - sh
+      - -c
+      - "alembic upgrade head && python -m prahari_api.load --events /app/contracts/fixtures/conjunctions.real.json"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-prahari}:${POSTGRES_PASSWORD:-prahari}@db:5432/${POSTGRES_DB:-prahari}
+    volumes:
+      - ./contracts:/app/contracts:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  prahari_pgdata:

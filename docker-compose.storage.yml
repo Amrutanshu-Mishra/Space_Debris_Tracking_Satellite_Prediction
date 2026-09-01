@@ -1,0 +1,22 @@
+# Layer over docker-compose.yml to run the API against Postgres + Redis
+# instead of the in-memory JSON fixture:
+#
+#   docker compose -f docker-compose.yml -f docker-compose.storage.yml \
+#     --profile storage up --build
+#
+# (or `make demo-storage`). Without this override the `storage` profile
+# still starts db/redis/loader, but `api` keeps reading the fixture unless
+# you set DATABASE_URL in your own environment.
+
+services:
+  api:
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-prahari}:${POSTGRES_PASSWORD:-prahari}@db:5432/${POSTGRES_DB:-prahari}
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      loader:
+        condition: service_completed_successfully

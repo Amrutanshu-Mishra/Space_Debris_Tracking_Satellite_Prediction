@@ -3,6 +3,10 @@
 # same-origin requests (no CORS in this deployment). The bundle carries its
 # own fonts, CSS, and the ground-track world outline — nothing is fetched at
 # runtime.
+#
+# There are no build-time environment variables: the client calls the fixed
+# relative path /api/v1 and nginx proxies it to `api`, so one image works for
+# every deployment target.
 
 FROM node:20-alpine AS build
 WORKDIR /app
@@ -13,9 +17,6 @@ RUN npm install --no-audit --no-fund
 
 COPY . .
 
-# same-origin: the client calls /api/v1 and nginx proxies it to `api`
-ENV VITE_API_BASE_URL=/api/v1 \
-    VITE_WS_BASE_URL=/api/v1
 RUN npm run build
 
 FROM nginx:1.27-alpine

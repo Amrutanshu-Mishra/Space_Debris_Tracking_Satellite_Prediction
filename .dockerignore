@@ -1,0 +1,16 @@
+# Build context hygiene for services/api/Dockerfile (context is the repo root).
+# No .env ever enters an image — the API reads configuration from the
+# environment only, and secrets must not be layered into the build.
+**/.env
+**/.env.*
+!**/.env.example
+
+.git
+.venv
+**/__pycache__
+**/*.pyc
+**/node_modules
+web/dist
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache

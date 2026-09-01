@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:static": "tsc -b && vite build && node scripts/bundle-static-data.mjs",
     "preview": "vite preview --host",
     "lint": "eslint src --ext ts,tsx",
     "typecheck": "tsc -b --noEmit",

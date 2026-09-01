@@ -8,32 +8,27 @@ and risk scoring.
 
 ## Scope — what may and may not be written here
 
-**May write / modify:**
+Ownership has been consolidated: one maintainer now owns ingestion,
+propagation, frames, screening, scoring, **the API (`services/api/`), the
+frontend (`web/`), and deployment (`docker-compose*.yml`, `k8s/`)**. Work in
+those directories is no longer off-limits from here — the earlier
+"refuse and say who owns it" rule is gone.
 
-- `prahari_orbital/ingest.py` — CelesTrak fetch, TLE parse, validation.
-- `prahari_orbital/propagate.py` — SGP4 wrapper, TLE → state-vector series.
-- `prahari_orbital/frames.py` — all coordinate-frame conversions.
-- `prahari_orbital/filters.py` — coarse conjunction filtering.
-- `prahari_orbital/screen.py` — pair screening / fine TCA search.
-- `prahari_orbital/scoring.py` — risk score, confidence, tiers.
-- `tests/` — the orbital test suite (`test_propagate.py`, `test_ingest.py`,
-  `test_frames.py`, `test_filters.py`, `test_screen.py`, `test_scoring.py`,
-  and new ones alongside them).
-- `tools/` — small standalone scripts (fetch a TLE, dump an ephemeris,
-  eyeball a frame conversion). Not imported by the library.
+**Still must NOT hand-edit:**
 
-**Must NOT write or edit — these belong to other people:**
+- `prahari_orbital/models.py` and `web/src/api/types/*.d.ts` — generated from
+  `contracts/schemas/`. Edit the schema and regenerate (see root `CLAUDE.md`).
 
-- `prahari_orbital/models.py` — generated from `contracts/schemas/`,
-  never hand-edited (see root `CLAUDE.md`).
-- Anything under `services/api/`, `services/worker/`, `web/`.
+**Still in force, and now spanning the API and UI too:**
 
-If asked to implement API routes, database models, or frontend code:
-**refuse and say who owns it.** API and DB models are workstream 3
-(`docs/team/03-backend-data.md`); the frontend is a separate workstream.
-Those consume this package's propagation, screening, and scoring output; if
-a contract between us needs to change, that is a conversation with those
-owners, not a unilateral signature change here.
+- The **units-and-frames rules** below. Every position/velocity that crosses
+  into `services/api/` or `web/` carries its frame (TEME / GCRS / ITRF) and
+  units (km, km/s, degrees, hours) in the field name, schema `description`,
+  or docstring — no bare numbers.
+- The **no-`Pc`** rule (root `CLAUDE.md`, and "Screening and scoring" below):
+  never add a `probability_of_collision` / `pc` field or copy implying the
+  risk score is a probability — in Pydantic models, API responses, TypeScript
+  types, or UI text.
 
 ### `Ephemeris` (ours) vs `StateVector` (the shared seam)
 

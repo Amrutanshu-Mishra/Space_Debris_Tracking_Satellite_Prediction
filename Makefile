@@ -1,4 +1,4 @@
-.PHONY: up down demo demo-offline logs test lint seed fmt clean
+.PHONY: up down demo demo-storage demo-offline logs test lint seed fmt clean
 
 up: ## Build and start the demo stack (api + web), logs attached
 	docker compose up --build
@@ -10,6 +10,14 @@ demo: ## Build, start detached, wait for the API health check, print the URL
 	docker compose up --build --detach --wait
 	@echo ""
 	@echo "  PRAHARI console : http://localhost:8080"
+	@echo "  API health      : http://localhost:8000/api/v1/health"
+	@echo ""
+
+demo-storage: ## Build, start with Postgres + Redis (opt-in persistence), run the loader
+	docker compose -f docker-compose.yml -f docker-compose.storage.yml \
+		--profile storage up --build --detach --wait
+	@echo ""
+	@echo "  PRAHARI console : http://localhost:8080  (API reading from Postgres)"
 	@echo "  API health      : http://localhost:8000/api/v1/health"
 	@echo ""
 
