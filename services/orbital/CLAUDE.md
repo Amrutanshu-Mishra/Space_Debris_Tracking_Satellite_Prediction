@@ -49,6 +49,14 @@ The `CatalogObject -> StateVector` functions in `propagate.py` (`propagate`,
 `StateVector` should converge, that is a conversation with the screening
 owner, not a unilateral edit here.
 
+## Git
+
+- **Work directly on `main`. Do not create feature branches.** One person
+  works in this repo now; branching adds merge overhead for no benefit.
+- **Commit after each verified change**, with a message that states what was
+  verified (the command(s) run and their result).
+- **Never push without being asked.**
+
 ## Screening and scoring
 
 - **`contracts/schemas/conjunction.schema.json` is frozen.** Scoring output
