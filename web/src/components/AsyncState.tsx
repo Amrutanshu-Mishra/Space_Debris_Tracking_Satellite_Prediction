@@ -28,32 +28,28 @@ function errorHint(error: unknown): ReactNode {
   if (error instanceof StaticModeError) {
     return (
       <>
-        This page is running from a static export (<code>npm run build:static</code>), which
-        bundles the screened-events file but has no API behind it. Views that need live
-        propagation — geometry, ground tracks, catalogue search — only work against a
-        running backend.
+        This page is a static export (<code>npm run build:static</code>): it bundles the
+        screened-events file but has no API behind it. Geometry, ground tracks, and catalogue
+        search need a running backend.
       </>
     );
   }
   if (error instanceof ApiError && error.status >= 500) {
     return (
       <>
-        The API returned <code>{error.status}</code>. Check its logs (
-        <code>docker compose logs api</code>) — it logs at startup which data source and
-        cache it chose, so a mode mismatch shows there.
+        The API returned <code>{error.status}</code>. Its logs name the data source and cache
+        it chose at startup, so a misconfiguration shows there.
       </>
     );
   }
   if (error instanceof ApiError && error.status === 404) {
-    return <>The API is up but has no record for this request.</>;
+    return <>The API is reachable but has no record for this request.</>;
   }
-  // Network / CORS / proxy failure — the request never got a response.
   return (
     <>
-      The request to <code>/api/v1</code> did not get a response. Check the API container is
-      running and healthy (<code>curl -s localhost:8000/api/v1/health</code> should return{" "}
-      <code>{`{"status":"ok"}`}</code>) and that whatever serves this page forwards{" "}
-      <code>/api/</code> to it.
+      The request to <code>/api/v1</code> got no response. Check that the API is running and
+      that whatever serves this page forwards <code>/api/</code> to it —{" "}
+      <code>GET /api/v1/health</code> should return <code>{`{"status":"ok"}`}</code>.
     </>
   );
 }
