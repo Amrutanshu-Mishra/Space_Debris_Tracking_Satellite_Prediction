@@ -26,6 +26,17 @@ dev = [
     "aiosqlite>=0.20",
 ]
 
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+# `alembic/` (migration scripts) and `tests/` sit alongside `prahari_api/` at
+# the top level, so setuptools' flat-layout auto-discovery refuses to guess
+# ("Multiple top-level packages discovered"). Name the one importable package
+# explicitly — same as services/orbital/pyproject.toml.
+[tool.setuptools]
+packages = ["prahari_api"]
+
 [tool.ruff]
 line-length = 100
 

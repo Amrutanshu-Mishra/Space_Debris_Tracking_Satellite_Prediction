@@ -1,4 +1,8 @@
-FROM python:3.11-slim
+# 3.13 to match the dev environment (services/orbital/requirements.txt is a
+# 3.13 freeze). numpy, scipy, asyncpg, uvloop, httptools and watchfiles all
+# publish cp313 manylinux wheels, so `pip install` stays wheels-only and this
+# slim image needs no C toolchain.
+FROM python:3.13-slim
 
 WORKDIR /app
 
