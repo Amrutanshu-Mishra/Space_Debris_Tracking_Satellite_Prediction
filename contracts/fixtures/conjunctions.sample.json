@@ -21,7 +21,8 @@
     "confidence": 0.95,
     "confidence_note": "Perigee is below 500 km; drag uncertainty elevated.",
     "max_epoch_age_hours": 13.1,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "0000000d-a0b3-4b50-9bf9-5d9544e22691",
@@ -45,7 +46,8 @@
     "confidence": 0.61,
     "confidence_note": "Secondary TLE epoch is 94.6 h old; perigee is below 500 km; drag uncertainty elevated.",
     "max_epoch_age_hours": 94.6,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "00000012-f154-4afa-aed6-ff5e2f14f777",
@@ -69,7 +71,8 @@
     "confidence": 0.83,
     "confidence_note": "Both TLE epochs are fresh and perigees are above 500 km.",
     "max_epoch_age_hours": 41.5,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "00000023-65fa-4ebf-8c06-6ab9fb6bf1dc",
@@ -93,7 +96,8 @@
     "confidence": 0.83,
     "confidence_note": "Both TLE epochs are fresh and perigees are above 500 km.",
     "max_epoch_age_hours": 41.5,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "00000001-d763-4bda-858f-757f6dd013f3",
@@ -117,7 +121,8 @@
     "confidence": 0.76,
     "confidence_note": "Secondary TLE epoch is 58.3 h old.",
     "max_epoch_age_hours": 58.3,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "00000004-8d16-4cb7-9a12-5b817b8301cf",
@@ -141,7 +146,8 @@
     "confidence": 0.47,
     "confidence_note": "Secondary TLE epoch is 126.1 h old.",
     "max_epoch_age_hours": 126.1,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "0000000f-15a3-4f6e-af83-a17e9ee4105d",
@@ -165,7 +171,8 @@
     "confidence": 0.31,
     "confidence_note": "Secondary TLE epoch is 165.1 h old.",
     "max_epoch_age_hours": 165.1,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "00000018-8ae1-4e3c-ae7c-d3f673461e07",
@@ -189,7 +196,8 @@
     "confidence": 0.75,
     "confidence_note": "Secondary TLE epoch is 59.1 h old; perigee is below 500 km; drag uncertainty elevated.",
     "max_epoch_age_hours": 59.1,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "0000001f-7aa7-48b3-a470-d36844d18524",
@@ -213,7 +221,8 @@
     "confidence": 0.36,
     "confidence_note": "Primary TLE epoch is 153.4 h old; perigee is below 500 km; drag uncertainty elevated.",
     "max_epoch_age_hours": 153.4,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "0000001c-b1c0-4f69-9d12-2ddace015413",
@@ -237,7 +246,8 @@
     "confidence": 0.91,
     "confidence_note": "Both TLE epochs are fresh and perigees are above 500 km.",
     "max_epoch_age_hours": 21.2,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "00000020-09ee-44de-865a-5f3305aa5eab",
@@ -261,7 +271,8 @@
     "confidence": 0.93,
     "confidence_note": "Both TLE epochs are fresh and perigees are above 500 km.",
     "max_epoch_age_hours": 16.2,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "00000008-56c6-4127-ae0b-2c76284e4cd4",
@@ -285,7 +296,8 @@
     "confidence": 0.92,
     "confidence_note": "Perigee is below 500 km; drag uncertainty elevated.",
     "max_epoch_age_hours": 18.8,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "00000025-3d42-4caa-9f1d-4f5b98a15e4f",
@@ -309,7 +321,8 @@
     "confidence": 0.8,
     "confidence_note": "Perigee is below 500 km; drag uncertainty elevated.",
     "max_epoch_age_hours": 47.7,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "00000027-62cc-40ae-b05a-805b227dcecc",
@@ -333,7 +346,8 @@
     "confidence": 0.48,
     "confidence_note": "Primary TLE epoch is 125.4 h old; perigee is below 500 km; drag uncertainty elevated.",
     "max_epoch_age_hours": 125.4,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "00000007-92ac-41d6-966f-fd1da3ea21a2",
@@ -357,7 +371,8 @@
     "confidence": 0.9,
     "confidence_note": "Perigee is below 500 km; drag uncertainty elevated.",
     "max_epoch_age_hours": 24.8,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "00000021-6f33-4af0-b5ca-ff2dcca99089",
@@ -381,7 +396,8 @@
     "confidence": 0.82,
     "confidence_note": "Both TLE epochs are fresh and perigees are above 500 km.",
     "max_epoch_age_hours": 44.1,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "0000001b-a680-4f3c-bbcc-452d71e15b9f",
@@ -405,7 +421,8 @@
     "confidence": 0.84,
     "confidence_note": "Perigee is below 500 km; drag uncertainty elevated.",
     "max_epoch_age_hours": 38.7,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "00000016-65dd-4595-a46e-a6725ae86d18",
@@ -429,7 +446,8 @@
     "confidence": 0.84,
     "confidence_note": "Both TLE epochs are fresh and perigees are above 500 km.",
     "max_epoch_age_hours": 38.7,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "0000001d-b011-492d-bc0e-044288fc3da1",
@@ -453,7 +471,8 @@
     "confidence": 0.96,
     "confidence_note": "Perigee is below 500 km; drag uncertainty elevated.",
     "max_epoch_age_hours": 9.6,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "00000002-d9d9-4448-a094-2aeadbeae9f8",
@@ -477,7 +496,8 @@
     "confidence": 0.68,
     "confidence_note": "Secondary TLE epoch is 76.6 h old.",
     "max_epoch_age_hours": 76.6,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "00000000-4c93-4314-96b5-2fb61e158e2f",
@@ -501,7 +521,8 @@
     "confidence": 0.85,
     "confidence_note": "Both TLE epochs are fresh and perigees are above 500 km.",
     "max_epoch_age_hours": 35.3,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "00000011-a19d-4044-8183-6be7ac9204b4",
@@ -525,7 +546,8 @@
     "confidence": 0.48,
     "confidence_note": "Primary TLE epoch is 124.0 h old.",
     "max_epoch_age_hours": 124.0,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "00000009-2e2a-491a-ac8e-8d92d0c59550",
@@ -549,7 +571,8 @@
     "confidence": 0.98,
     "confidence_note": "Perigee is below 500 km; drag uncertainty elevated.",
     "max_epoch_age_hours": 4.3,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "00000013-7506-4332-a28d-78bbcdd8af09",
@@ -573,7 +596,8 @@
     "confidence": 0.9,
     "confidence_note": "Both TLE epochs are fresh and perigees are above 500 km.",
     "max_epoch_age_hours": 23.4,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "0000000c-a1a7-4d32-ad32-86d5d5098e07",
@@ -597,7 +621,8 @@
     "confidence": 0.49,
     "confidence_note": "Primary TLE epoch is 123.4 h old; perigee is below 500 km; drag uncertainty elevated.",
     "max_epoch_age_hours": 123.4,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "00000017-55cc-4acb-b5fe-cf3e9256d707",
@@ -621,7 +646,8 @@
     "confidence": 0.81,
     "confidence_note": "Both TLE epochs are fresh and perigees are above 500 km.",
     "max_epoch_age_hours": 45.2,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "00000006-02b5-42ea-929a-dee999a9af6a",
@@ -645,7 +671,8 @@
     "confidence": 0.68,
     "confidence_note": "Primary TLE epoch is 77.4 h old.",
     "max_epoch_age_hours": 77.4,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "0000001a-4f80-42b2-b1e6-756e4f32ea54",
@@ -669,7 +696,8 @@
     "confidence": 0.84,
     "confidence_note": "Perigee is below 500 km; drag uncertainty elevated.",
     "max_epoch_age_hours": 39.3,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "00000005-3cf8-475a-b92a-52d6f301bb6c",
@@ -693,7 +721,8 @@
     "confidence": 0.92,
     "confidence_note": "Perigee is below 500 km; drag uncertainty elevated.",
     "max_epoch_age_hours": 18.4,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "00000024-81b2-4f66-a63f-b88932df8d45",
@@ -717,7 +746,8 @@
     "confidence": 0.84,
     "confidence_note": "Both TLE epochs are fresh and perigees are above 500 km.",
     "max_epoch_age_hours": 39.3,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "00000022-248c-4f0b-973e-800ad76f1e65",
@@ -741,7 +771,8 @@
     "confidence": 0.97,
     "confidence_note": "Perigee is below 500 km; drag uncertainty elevated.",
     "max_epoch_age_hours": 7.7,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "00000019-6bd0-4557-b2d2-30ec1a5ed196",
@@ -765,7 +796,8 @@
     "confidence": 0.83,
     "confidence_note": "Both TLE epochs are fresh and perigees are above 500 km.",
     "max_epoch_age_hours": 41.4,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "00000014-5a6c-4d7d-bff2-999e7c93243e",
@@ -789,7 +821,8 @@
     "confidence": 0.7,
     "confidence_note": "Secondary TLE epoch is 71.4 h old; perigee is below 500 km; drag uncertainty elevated.",
     "max_epoch_age_hours": 71.4,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "00000015-f3fc-4314-b994-ab58be9da951",
@@ -813,7 +846,8 @@
     "confidence": 0.15,
     "confidence_note": "Primary TLE epoch is 208.9 h old; perigee is below 500 km; drag uncertainty elevated.",
     "max_epoch_age_hours": 208.9,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "00000010-41a9-41bb-b62a-10ac8a6fc4b3",
@@ -837,7 +871,8 @@
     "confidence": 0.89,
     "confidence_note": "Both TLE epochs are fresh and perigees are above 500 km.",
     "max_epoch_age_hours": 25.8,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "0000000b-7c8e-4ade-babb-ebe3ae7cfd14",
@@ -861,7 +896,8 @@
     "confidence": 0.62,
     "confidence_note": "Primary TLE epoch is 91.2 h old.",
     "max_epoch_age_hours": 91.2,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "00000003-03ae-4c00-9a4b-d15450deef43",
@@ -885,7 +921,8 @@
     "confidence": 0.82,
     "confidence_note": "Both TLE epochs are fresh and perigees are above 500 km.",
     "max_epoch_age_hours": 44.1,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "0000000e-69de-4755-99f4-7fd8d5bea8dc",
@@ -909,7 +946,8 @@
     "confidence": 0.63,
     "confidence_note": "Primary TLE epoch is 89.6 h old; perigee is below 500 km; drag uncertainty elevated.",
     "max_epoch_age_hours": 89.6,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "0000001e-03b2-4bf4-9823-dfcc8f807d8b",
@@ -933,7 +971,8 @@
     "confidence": 0.9,
     "confidence_note": "Perigee is below 500 km; drag uncertainty elevated.",
     "max_epoch_age_hours": 22.9,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   },
   {
     "event_id": "0000000a-250f-496a-ab84-3be8f26f9b19",
@@ -957,6 +996,7 @@
     "confidence": 0.73,
     "confidence_note": "Secondary TLE epoch is 65.5 h old; perigee is below 500 km; drag uncertainty elevated.",
     "max_epoch_age_hours": 65.5,
-    "screened_at": "2026-08-26T09:00:12Z"
+    "screened_at": "2026-08-26T09:00:12Z",
+    "intra_constellation": false
   }
 ]

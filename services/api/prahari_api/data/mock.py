@@ -77,6 +77,7 @@ class MockDataSource:
         since: str | None = None,
         until: str | None = None,
         min_score: float | None = None,
+        exclude_intra_constellation: bool = False,
         limit: int = 50,
         offset: int = 0,
     ) -> tuple[list[ConjunctionEvent], int]:
@@ -91,6 +92,8 @@ class MockDataSource:
             events = [e for e in events if e.tca <= until_dt]
         if min_score is not None:
             events = [e for e in events if e.risk_score >= min_score]
+        if exclude_intra_constellation:
+            events = [e for e in events if not e.intra_constellation]
         total = len(events)
         return events[offset : offset + limit], total
 

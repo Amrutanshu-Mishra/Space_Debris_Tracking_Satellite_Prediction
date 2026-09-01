@@ -96,3 +96,12 @@
   text-decoration: none;
   cursor: default;
 }
+
+.filterbar__group--toggle {
+  cursor: help;
+}
+.filterbar__toggleval {
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  color: var(--mute);
+}

@@ -61,7 +61,7 @@ export class StaticModeError extends Error {
   }
 }
 
-type QueryParams = Record<string, string | number | undefined>;
+type QueryParams = Record<string, string | number | boolean | undefined>;
 
 /** "?a=1&b=2" (or "" when there is nothing to add). URLSearchParams only —
  *  the base is relative, so `new URL()` has no valid base to resolve against. */
@@ -108,6 +108,8 @@ interface ConjunctionQuery {
   since?: string;
   until?: string;
   min_score?: number;
+  /** Drop pairs where both objects are the same station-kept constellation. */
+  exclude_intra_constellation?: boolean;
   limit?: number;
   offset?: number;
 }
@@ -124,6 +126,7 @@ function selectStaticConjunctions(
     if (opts.since && event.tca < opts.since) return false;
     if (opts.until && event.tca > opts.until) return false;
     if (opts.min_score !== undefined && event.risk_score < opts.min_score) return false;
+    if (opts.exclude_intra_constellation && event.intra_constellation) return false;
     return true;
   });
   return filtered.sort((a, b) => (a.tca < b.tca ? -1 : a.tca > b.tca ? 1 : 0));
@@ -132,7 +135,12 @@ function selectStaticConjunctions(
 export const api = {
   health: (): Promise<{ status: string; data_source: string }> => request("/health"),
 
-  catalogStatus: (): Promise<CatalogStatus> => request("/catalog/status"),
+  // A static export has no API, so there is no /catalog/status to hit — fail
+  // with a clear StaticModeError instead of a bare 404 (same as geometry).
+  catalogStatus: async (): Promise<CatalogStatus> => {
+    if (await isStaticMode()) throw new StaticModeError("Catalogue status");
+    return request("/catalog/status");
+  },
 
   listObjects: (opts: { q?: string; type?: string; limit?: number; offset?: number } = {}): Promise<
     Page<CatalogObject>

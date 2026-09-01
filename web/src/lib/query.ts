@@ -30,13 +30,24 @@ export interface Filters {
   windowHours: number | null;
   /** Inclusive lower bound on `risk_score`, 0..1. */
   minScore: number;
+  /** Include same-constellation pairs (Starlink/OneWeb/Globalstar/Iridium on
+   *  both sides). Default false: they dominate the catalogue and the operator
+   *  station-keeps both objects, so they are not independent risk. Applied at
+   *  fetch time (server-side `exclude_intra_constellation`), not by
+   *  `applyFilters`, so pagination stays correct. */
+  showIntraConstellation: boolean;
 }
 
 export const ALL_TIERS: readonly RiskTier[] = ["GREEN", "AMBER", "RED"];
 export const WINDOW_CHOICES: readonly (number | null)[] = [6, 24, 72, 168, null];
 
 export const DEFAULT_SORT: SortState = { key: "tca", dir: "asc" };
-export const DEFAULT_FILTERS: Filters = { tiers: [], windowHours: null, minScore: 0 };
+export const DEFAULT_FILTERS: Filters = {
+  tiers: [],
+  windowHours: null,
+  minScore: 0,
+  showIntraConstellation: false,
+};
 
 const SORT_KEYS: ReadonlySet<string> = new Set<SortKey>([
   "tca",
@@ -87,7 +98,12 @@ export function parseQuery(params: URLSearchParams): { sort: SortState; filters:
   const rawMin = Number(params.get("min"));
   const minScore = Number.isFinite(rawMin) ? Math.min(1, Math.max(0, rawMin)) : 0;
 
-  return { sort, filters: { tiers: dedupeTiers(tiers), windowHours, minScore } };
+  const showIntraConstellation = params.get("intra") === "1";
+
+  return {
+    sort,
+    filters: { tiers: dedupeTiers(tiers), windowHours, minScore, showIntraConstellation },
+  };
 }
 
 function dedupeTiers(tiers: RiskTier[]): RiskTier[] {
@@ -123,6 +139,9 @@ export function writeQuery(
 
     if (minScore <= 0) params.delete("min");
     else params.set("min", String(minScore));
+
+    if (next.filters.showIntraConstellation) params.set("intra", "1");
+    else params.delete("intra");
   }
 
   return params;

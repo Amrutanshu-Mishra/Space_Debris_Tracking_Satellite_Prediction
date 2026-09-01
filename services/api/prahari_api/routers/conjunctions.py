@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from prahari_orbital.models import ConjunctionEvent
 
@@ -17,12 +19,24 @@ async def list_conjunctions(
     since: str | None = Query(default=None, description="ISO 8601 UTC, inclusive lower bound on tca"),
     until: str | None = Query(default=None, description="ISO 8601 UTC, inclusive upper bound on tca"),
     min_score: float | None = Query(default=None, ge=0, le=1),
+    exclude_intra_constellation: bool = Query(
+        default=False,
+        description="Drop pairs where both objects are the same station-kept "
+        "constellation (Starlink/OneWeb/Globalstar/Iridium). The list view "
+        "sets this true by default.",
+    ),
     limit: int = Query(default=50, ge=1, le=500),
     offset: int = Query(default=0, ge=0),
     data: DataSource = Depends(get_data_source),
 ) -> Page[ConjunctionEvent]:
     items, total = await data.list_conjunctions(
-        tier=tier, since=since, until=until, min_score=min_score, limit=limit, offset=offset
+        tier=tier,
+        since=since,
+        until=until,
+        min_score=min_score,
+        exclude_intra_constellation=exclude_intra_constellation,
+        limit=limit,
+        offset=offset,
     )
     return Page(items=items, total=total, limit=limit, offset=offset)
 

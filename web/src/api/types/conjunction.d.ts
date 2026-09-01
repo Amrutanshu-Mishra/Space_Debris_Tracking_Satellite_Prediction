@@ -40,4 +40,10 @@ export interface ConjunctionEvent {
   max_epoch_age_hours: number;
   /** ISO 8601 UTC */
   screened_at: string;
+  /**
+   * Both objects are active payloads of one large constellation
+   * (Starlink / OneWeb / Globalstar / Iridium) — an operator-managed
+   * same-shell pair, not independent risk. NOT a probability.
+   */
+  intra_constellation: boolean;
 }

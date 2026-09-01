@@ -84,6 +84,15 @@ class ConjunctionEvent(BaseModel):
     confidence_note: str
     max_epoch_age_hours: float = Field(..., ge=0)
     screened_at: datetime
+    intra_constellation: bool = Field(
+        ...,
+        description=(
+            "Both objects are active payloads of one large constellation "
+            "(Starlink / OneWeb / Globalstar / Iridium), matched by name prefix "
+            "— an operator-managed same-shell pair, not independent risk. NOT a "
+            "probability."
+        ),
+    )
 
 
 class EpochAgeDistribution(BaseModel):

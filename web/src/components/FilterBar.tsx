@@ -20,7 +20,12 @@ function windowLabel(h: number | null): string {
 }
 
 function isDefault(f: Filters): boolean {
-  return f.tiers.length === 0 && f.windowHours === null && f.minScore <= 0;
+  return (
+    f.tiers.length === 0 &&
+    f.windowHours === null &&
+    f.minScore <= 0 &&
+    !f.showIntraConstellation
+  );
 }
 
 export function FilterBar({
@@ -100,6 +105,22 @@ export function FilterBar({
           aria-valuetext={filters.minScore.toFixed(2)}
         />
         <output className="filterbar__out">{filters.minScore.toFixed(2)}</output>
+      </label>
+
+      <label
+        className="filterbar__group filterbar__group--toggle"
+        title="Same-constellation pairs (Starlink, OneWeb, Globalstar, Iridium on both sides) are same-shell satellites the operator station-keeps. They are geometrically real close approaches but not independent conjunction risk, and they dominate the catalogue. Hidden by default."
+      >
+        <span className="filterbar__label">constellation pairs</span>
+        <input
+          type="checkbox"
+          className="filterbar__check"
+          checked={filters.showIntraConstellation}
+          onChange={(e) => onChange({ ...filters, showIntraConstellation: e.target.checked })}
+        />
+        <span className="filterbar__toggleval">
+          {filters.showIntraConstellation ? "shown" : "hidden"}
+        </span>
       </label>
 
       <button

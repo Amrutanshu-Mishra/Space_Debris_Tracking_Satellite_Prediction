@@ -23,3 +23,11 @@
   font-size: var(--text-label);
   color: var(--mute);
 }
+
+.eventlist__note {
+  margin: 0.25rem 0 0;
+  max-width: 68ch;
+  font-size: var(--text-label);
+  line-height: 1.4;
+  color: var(--mute);
+}

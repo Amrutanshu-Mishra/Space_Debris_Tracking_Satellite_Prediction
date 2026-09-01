@@ -141,3 +141,18 @@
   color: var(--tier-caution);
   font-weight: var(--weight-strong);
 }
+
+/* marks a row whose two objects are the same station-kept constellation —
+   only visible when the constellation-pairs filter is on */
+.etable .obj__intra {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0 0.35rem;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.75em;
+  color: var(--mute);
+  vertical-align: middle;
+}
+.etable tr[data-intra] { opacity: 0.82; }

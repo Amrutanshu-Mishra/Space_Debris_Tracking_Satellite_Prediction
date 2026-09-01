@@ -42,18 +42,22 @@ export function EventList(): JSX.Element {
   const [error, setError] = useState<unknown>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
+  // Same-constellation exclusion is a fetch parameter, not a client-side
+  // filter (applyFilters), so the fetched page is already the right set even
+  // when it exceeds the 500-row limit. Flipping the toggle re-fetches.
+  const showIntra = filters.showIntraConstellation;
   const load = useCallback(() => {
     setError(null);
     setAll(null);
     setScreenedCount(0);
     api
-      .listConjunctions({ limit: 500 })
+      .listConjunctions({ limit: 500, exclude_intra_constellation: !showIntra })
       .then((page) => {
         setAll(page.items);
         setScreenedCount(page.total);
       })
       .catch(setError);
-  }, []);
+  }, [showIntra]);
 
   useEffect(load, [load]);
 
@@ -88,6 +92,13 @@ export function EventList(): JSX.Element {
         <p className="eventlist__count" aria-live="polite">
           {all ? `${rows.length} shown of ${screenedCount} screened` : " "}
         </p>
+        {all ? (
+          <p className="eventlist__note">
+            {showIntra
+              ? "Including same-constellation pairs (Starlink / OneWeb / Globalstar / Iridium on both sides): geometrically real, but the operator station-keeps both objects, so they are not independent conjunction risk."
+              : "Same-constellation pairs are hidden — the operator station-keeps both objects. Use the constellation-pairs toggle to include them."}
+          </p>
+        ) : null}
       </header>
 
       <FilterBar filters={filters} onChange={onFilters} />

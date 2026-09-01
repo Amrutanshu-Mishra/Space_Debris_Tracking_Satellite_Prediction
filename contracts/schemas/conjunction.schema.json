@@ -21,7 +21,8 @@
     "confidence",
     "confidence_note",
     "max_epoch_age_hours",
-    "screened_at"
+    "screened_at",
+    "intra_constellation"
   ],
   "properties": {
     "event_id": {
@@ -93,6 +94,10 @@
       "type": "string",
       "format": "date-time",
       "description": "When this event was produced by the screening job, UTC, ISO 8601."
+    },
+    "intra_constellation": {
+      "type": "boolean",
+      "description": "True when both objects are active payloads of the same large constellation (Starlink, OneWeb, Globalstar, Iridium), matched by name prefix. Such pairs are same-shell co-orbiting satellites whose separation the operator manages by station-keeping: geometrically real close approaches, but not independent conjunction risk. Not a probability. The list view hides these by default; a toggle shows them."
     }
   },
   "definitions": {

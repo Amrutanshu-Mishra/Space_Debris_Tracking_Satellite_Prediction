@@ -137,6 +137,7 @@ export function EventTable({
                 role="row"
                 aria-selected={selected}
                 data-selected={selected || undefined}
+                data-intra={e.intra_constellation || undefined}
                 onClick={() => onSelect(e.event_id)}
                 onDoubleClick={() => onOpen(e.event_id)}
               >
@@ -162,6 +163,14 @@ export function EventTable({
                 <td>
                   <span className="obj__name">{e.secondary.name}</span>
                   <span className="obj__id">{e.secondary.norad_id}</span>
+                  {e.intra_constellation ? (
+                    <span
+                      className="obj__intra"
+                      title="Both objects are the same station-kept constellation — an operator-managed pair, not independent conjunction risk. Shown because the constellation-pairs filter is on."
+                    >
+                      same constellation
+                    </span>
+                  ) : null}
                 </td>
                 <td className="num">{e.miss_distance_km.toFixed(3)}</td>
                 <td className="num">{e.relative_velocity_km_s.toFixed(2)}</td>

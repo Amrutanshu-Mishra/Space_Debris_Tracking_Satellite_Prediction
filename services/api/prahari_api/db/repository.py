@@ -158,6 +158,7 @@ class DbDataSource:
         since: str | None = None,
         until: str | None = None,
         min_score: float | None = None,
+        exclude_intra_constellation: bool = False,
         limit: int = 50,
         offset: int = 0,
     ) -> tuple[list[ConjunctionEvent], int]:
@@ -184,6 +185,9 @@ class DbDataSource:
             if min_score is not None:
                 f = ConjunctionRow.risk_score >= min_score
                 stmt, count_stmt = stmt.where(f), count_stmt.where(f)
+            if exclude_intra_constellation:
+                intra = ConjunctionRow.intra_constellation.is_(False)
+                stmt, count_stmt = stmt.where(intra), count_stmt.where(intra)
 
             total = (await session.execute(count_stmt)).scalar_one() or 0
             result = await session.execute(

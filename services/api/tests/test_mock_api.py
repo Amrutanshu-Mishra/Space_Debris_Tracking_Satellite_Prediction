@@ -84,6 +84,23 @@ def test_list_conjunctions_filter_by_tier() -> None:
     assert all(e["risk_tier"] == "RED" for e in body["items"])
 
 
+def test_conjunctions_carry_intra_constellation_flag() -> None:
+    body = client.get("/api/v1/conjunctions?limit=500").json()
+    assert body["items"]
+    assert all(isinstance(e["intra_constellation"], bool) for e in body["items"])
+
+
+def test_exclude_intra_constellation_param_is_wired() -> None:
+    unfiltered = client.get("/api/v1/conjunctions?limit=500").json()
+    filtered = client.get(
+        "/api/v1/conjunctions?limit=500&exclude_intra_constellation=true"
+    ).json()
+    assert filtered["total"] <= unfiltered["total"]
+    assert not any(e["intra_constellation"] for e in filtered["items"])
+    # the curated sample deliberately contains no same-constellation pairs
+    assert filtered["total"] == unfiltered["total"]
+
+
 def test_get_conjunction_and_geometry() -> None:
     listing = client.get("/api/v1/conjunctions?limit=1").json()
     event_id = listing["items"][0]["event_id"]

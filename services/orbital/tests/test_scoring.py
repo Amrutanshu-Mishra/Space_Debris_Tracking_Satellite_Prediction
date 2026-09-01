@@ -23,7 +23,9 @@ from prahari_orbital.scoring import (
     RISK_TIER_RED_THRESHOLD,
     compute_pc,
     confidence_band,
+    constellation_of,
     export_events,
+    is_intra_constellation,
     risk_score,
     risk_tier,
     score,
@@ -48,15 +50,17 @@ def _object(
     epoch_age_hours: float = 10.0,
     perigee_km: float = 700.0,
     radius_m: float = 2.0,
+    name: str | None = None,
+    object_type: ObjectType = ObjectType.PAYLOAD,
 ) -> CatalogObject:
     return CatalogObject(
         norad_id=norad_id,
-        name=f"SCORE-TEST-{norad_id}",
+        name=name if name is not None else f"SCORE-TEST-{norad_id}",
         tle_line1="1 " + "0" * 67,
         tle_line2="2 " + "0" * 67,
         epoch=datetime(2026, 8, 29, 0, 0, 0, tzinfo=UTC),
         epoch_age_hours=epoch_age_hours,
-        object_type=ObjectType.PAYLOAD,
+        object_type=object_type,
         rcs_size=RcsSize.MEDIUM,
         radius_m=radius_m,
         perigee_km=perigee_km,
@@ -243,6 +247,57 @@ def test_score_rejects_naive_screened_at() -> None:
     naive = datetime(2026, 8, 29, 12, 0, 0)  # noqa: DTZ001 -- deliberately naive
     with pytest.raises(ValueError, match="timezone-aware"):
         score(candidate, primary, secondary, screened_at=naive)
+
+
+# --------------------------------------------------------------------------- #
+# intra-constellation flagging                                                #
+# --------------------------------------------------------------------------- #
+
+
+def test_constellation_of_matches_known_prefixes_case_insensitively() -> None:
+    assert constellation_of("STARLINK-1234") == "STARLINK"
+    assert constellation_of("  starlink-1234") == "STARLINK"
+    assert constellation_of("OneWeb-0012") == "ONEWEB"
+    assert constellation_of("IRIDIUM 33 DEB") == "IRIDIUM"  # type gate is elsewhere
+    assert constellation_of("ISS (ZARYA)") is None
+    assert constellation_of("STARLINKX") == "STARLINK"  # prefix only; acceptable
+
+
+def test_is_intra_constellation_same_constellation_payloads() -> None:
+    a = _object(40001, name="STARLINK-1234")
+    b = _object(40002, name="STARLINK-5678")
+    assert is_intra_constellation(a, b) is True
+
+
+def test_is_intra_constellation_false_across_constellations_and_types() -> None:
+    starlink = _object(1, name="STARLINK-1")
+    oneweb = _object(2, name="ONEWEB-0002")
+    assert is_intra_constellation(starlink, oneweb) is False
+
+    iridium_payload = _object(3, name="IRIDIUM 33")
+    iridium_debris = _object(4, name="IRIDIUM 33 DEB", object_type=ObjectType.DEBRIS)
+    assert is_intra_constellation(iridium_payload, iridium_debris) is False
+
+    assert is_intra_constellation(_object(5, name="ISS (ZARYA)"), _object(6, name="HST")) is False
+
+
+def test_score_sets_intra_constellation_flag() -> None:
+    candidate = _result(miss_distance_km=3.0, primary_norad_id=1, secondary_norad_id=2)
+    starlink_pair = score(
+        candidate,
+        _object(1, name="STARLINK-1000"),
+        _object(2, name="STARLINK-2000"),
+        screened_at=_SCREENED_AT,
+    )
+    assert starlink_pair.intra_constellation is True
+
+    mixed = score(
+        candidate,
+        _object(1, name="STARLINK-1000"),
+        _object(2, name="COSMOS 2251 DEB", object_type=ObjectType.DEBRIS),
+        screened_at=_SCREENED_AT,
+    )
+    assert mixed.intra_constellation is False
 
 
 # --------------------------------------------------------------------------- #

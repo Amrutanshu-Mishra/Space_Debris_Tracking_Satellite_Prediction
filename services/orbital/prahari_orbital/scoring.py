@@ -29,8 +29,67 @@ from typing import Any
 
 from jsonschema import Draft7Validator
 
-from prahari_orbital.models import CatalogObject, ConjunctionEvent, ObjectRef, RiskTier
+from prahari_orbital.models import (
+    CatalogObject,
+    ConjunctionEvent,
+    ObjectRef,
+    ObjectType,
+    RiskTier,
+)
 from prahari_orbital.screen import ScreeningResult
+
+#: Large constellations whose same-shell members repeatedly drift through the
+#: 10 km screening threshold. A close approach between two of these is
+#: geometrically real but not independent conjunction risk: one operator flies
+#: both objects and manages the separation by station-keeping. Matched
+#: case-insensitively against the start of the object name.
+_CONSTELLATION_NAME_PREFIXES = ("STARLINK", "ONEWEB", "GLOBALSTAR", "IRIDIUM")
+
+
+def constellation_of(name: str) -> str | None:
+    """The constellation an object's name marks it as part of, or ``None``.
+
+    Args:
+        name: the object's catalogue name (its TLE name line).
+
+    Returns:
+        One of :data:`_CONSTELLATION_NAME_PREFIXES` when ``name`` starts with
+        it (case-insensitive, leading whitespace ignored), else ``None``.
+        ``"IRIDIUM 33 DEB"`` still returns ``"IRIDIUM"`` — callers that care
+        about *active* membership gate on object type separately.
+
+    Units/frame: none — string classification only.
+    """
+    upper = name.strip().upper()
+    for prefix in _CONSTELLATION_NAME_PREFIXES:
+        if upper.startswith(prefix):
+            return prefix
+    return None
+
+
+def is_intra_constellation(primary: CatalogObject, secondary: CatalogObject) -> bool:
+    """True when both objects are active payloads of the same constellation.
+
+    Both must be :attr:`~prahari_orbital.models.ObjectType.PAYLOAD` — a spent
+    Iridium rocket body or a Starlink debris fragment is not station-kept —
+    and both names must resolve to the same :func:`constellation_of` prefix.
+
+    Args:
+        primary: catalogue record for one object.
+        secondary: catalogue record for the other.
+
+    Returns:
+        Whether this pair is an operator-managed same-shell pair rather than
+        an independent conjunction. NOT a probability.
+
+    Units/frame: none.
+    """
+    if primary.object_type is not ObjectType.PAYLOAD:
+        return False
+    if secondary.object_type is not ObjectType.PAYLOAD:
+        return False
+    prefix = constellation_of(primary.name)
+    return prefix is not None and prefix == constellation_of(secondary.name)
 
 # --------------------------------------------------------------------------- #
 # risk_score — a weighted sum of three factors, each normalised to [0, 1].    #
@@ -314,8 +373,9 @@ def score(
         A :class:`~prahari_orbital.models.ConjunctionEvent` with a fresh
         ``event_id`` (uuid4), ``combined_radius_m`` the sum of the two objects'
         ``radius_m``, ``risk_score`` / ``risk_tier`` from :func:`risk_score` /
-        :func:`risk_tier`, and ``confidence`` / ``confidence_note`` from
-        :func:`confidence_band`. Never carries a probability field —
+        :func:`risk_tier`, ``confidence`` / ``confidence_note`` from
+        :func:`confidence_band`, and ``intra_constellation`` from
+        :func:`is_intra_constellation`. Never carries a probability field —
         ``ConjunctionEvent`` has none by contract.
 
     Raises:
@@ -364,6 +424,7 @@ def score(
         confidence_note=confidence_note,
         max_epoch_age_hours=max_epoch_age_hours,
         screened_at=screened_at,
+        intra_constellation=is_intra_constellation(primary, secondary),
     )
 
 

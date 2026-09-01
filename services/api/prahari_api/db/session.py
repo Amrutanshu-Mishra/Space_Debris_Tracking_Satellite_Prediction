@@ -97,6 +97,7 @@ def row_to_conjunction_event(
         confidence_note=row.confidence_note,
         max_epoch_age_hours=row.max_epoch_age_hours,
         screened_at=_ensure_utc(row.screened_at),
+        intra_constellation=row.intra_constellation,
     )
 
 
@@ -140,5 +141,6 @@ def conjunction_event_to_row_kwargs(
         "confidence_note": event.confidence_note,
         "max_epoch_age_hours": event.max_epoch_age_hours,
         "screened_at": _ensure_utc(event.screened_at),
+        "intra_constellation": event.intra_constellation,
         "screening_run_id": screening_run_id,
     }

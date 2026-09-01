@@ -24,7 +24,18 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from sqlalchemy import BigInteger, DateTime, Float, ForeignKey, Index, Integer, String, Text
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    DateTime,
+    Float,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+    false,
+)
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -93,6 +104,12 @@ class ConjunctionRow(Base):
     confidence_note: Mapped[str] = mapped_column(Text, nullable=False)
     max_epoch_age_hours: Mapped[float] = mapped_column(Float, nullable=False)
     screened_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    # Both objects are the same station-kept constellation (see
+    # prahari_orbital.scoring.is_intra_constellation). The list view excludes
+    # these by default. server_default keeps pre-existing rows valid.
+    intra_constellation: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=false()
+    )
     screening_run_id: Mapped[int | None] = mapped_column(
         ForeignKey("screening_runs.id"), nullable=True
     )

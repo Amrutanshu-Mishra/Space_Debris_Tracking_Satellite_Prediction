@@ -50,6 +50,7 @@ class DataSource(Protocol):
         since: str | None = None,
         until: str | None = None,
         min_score: float | None = None,
+        exclude_intra_constellation: bool = False,
         limit: int = 50,
         offset: int = 0,
     ) -> tuple[list[ConjunctionEvent], int]:
@@ -60,6 +61,9 @@ class DataSource(Protocol):
             since: ISO 8601 UTC, inclusive lower bound on `tca`.
             until: ISO 8601 UTC, inclusive upper bound on `tca`.
             min_score: inclusive lower bound on `risk_score`.
+            exclude_intra_constellation: drop events where
+                `ConjunctionEvent.intra_constellation` is true (same
+                station-kept constellation on both sides).
             limit: max rows returned.
             offset: rows to skip, for pagination.
 
