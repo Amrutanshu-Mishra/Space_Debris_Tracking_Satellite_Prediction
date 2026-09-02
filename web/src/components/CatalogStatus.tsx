@@ -3,7 +3,7 @@ import { api } from "../api/client";
 import type { CatalogStatus as CatalogStatusData } from "../api/types";
 import { formatCount, hours } from "../lib/format";
 import { Timestamp } from "./Timestamp";
-import { ErrorState, LoadingState } from "./AsyncState";
+import { LoadingState } from "./AsyncState";
 import "./CatalogStatus.css";
 
 const STALE_HOURS = 168; // one week — matches prahari_orbital.scoring confidence decay
@@ -13,7 +13,7 @@ const STALE_HOURS = 168; // one week — matches prahari_orbital.scoring confide
  * refresh, screening window, and — with visual weight, because it is part of
  * the trust argument, not decoration — the age of the underlying TLEs.
  */
-export function CatalogStatus(): JSX.Element {
+export function CatalogStatus(): JSX.Element | null {
   const [status, setStatus] = useState<CatalogStatusData | null>(null);
   const [error, setError] = useState<unknown>(null);
 
@@ -26,7 +26,12 @@ export function CatalogStatus(): JSX.Element {
   useEffect(load, [load]);
 
   if (error) {
-    return <ErrorState what="Catalogue status is unavailable." error={error} retry={load} />;
+    // The catalogue-health strip is supporting context, not the primary
+    // read-out — if it fails to load, stay silent rather than pushing an
+    // error card above the conjunctions list. Keep it discoverable in the
+    // console. (Conjunction load errors are still surfaced, in EventList.)
+    console.error("Catalogue status failed to load:", error);
+    return null;
   }
   if (!status) {
     return <LoadingState label="loading catalogue status…" />;
